@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.camera.view.PreviewView
+        android:id="@+id/previewView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- Nút mở thư viện (góc trái dưới) -->
+    <ImageButton
+        android:id="@+id/btnGallery"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_gravity="start|bottom"
+        android:layout_marginStart="24dp"
+        android:layout_marginBottom="36dp"
+        android:background="@android:color/transparent"
+        android:contentDescription="@string/open_gallery"
+        android:padding="8dp"
+        android:scaleType="centerInside"
+        android:src="@android:drawable/ic_menu_gallery"
+        android:tint="#FFFFFF" />
+
+    <!-- Nút chụp (giữa dưới) -->
+    <ImageButton
+        android:id="@+id/btnCapture"
+        android:layout_width="84dp"
+        android:layout_height="84dp"
+        android:layout_gravity="center|bottom"
+        android:layout_marginBottom="36dp"
+        android:background="@drawable/btn_shutter"
+        android:contentDescription="@string/capture"
+        android:padding="18dp"
+        android:scaleType="centerInside"
+        android:tint="#333333" />
+
+</FrameLayout>

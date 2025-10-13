@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">android_image_cropper</string>
+    <string name="capture">Chụp ảnh</string>
+    <string name="open_gallery">Mở thư viện</string>
+</resources>
