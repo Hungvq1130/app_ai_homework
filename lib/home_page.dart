@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'ask_page.dart';
 import 'crop_page.dart';
 import 'hoc_tap_tab.dart';
-import 'home_shell.dart';
 import 'menu_tab.dart';
+import 'settings_page.dart'; // ⬅️ import trang Cài đặt
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key, this.initialIndex = 0, this.incomingTaskId});
 
   final int initialIndex;
-  final String? incomingTaskId; // ⬅️ task_id mới nhận (nếu có)
+  final String? incomingTaskId;
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -26,7 +26,7 @@ class _HomePageState extends State<HomePage> {
     _index = widget.initialIndex;
     _pages = [
       const TrangChuTab(),
-      HocTapTab(), // ⬅️ truyền taskId
+      HocTapTab(),
       const MenuTab(),
     ];
   }
@@ -34,7 +34,24 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: _index == 0 ? null : AppBar(title: Text(_titles[_index])),
+      // AppBar chỉ hiện khi _index != 0; thêm icon settings ở actions
+      appBar: _index == 0
+          ? null
+          : AppBar(
+        title: Text(_titles[_index]),
+        actions: [
+          if (_index == 2)
+          IconButton(
+            tooltip: 'Cài đặt',
+            icon: const Icon(Icons.settings),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const SettingsPage()),
+              );
+            },
+          ),
+        ],
+      ),
       body: IndexedStack(index: _index, children: _pages),
       bottomNavigationBar: EqualBottomBar(
         currentIndex: _index,
@@ -48,6 +65,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
+
 
 
 /// ----------------- TRANG CHỦ (Responsive) -----------------
@@ -365,7 +383,6 @@ class _AskBox extends StatelessWidget {
           alignment: Alignment.centerLeft,
           child: Row(
             children: [
-              Icon(Icons.search, color: theme.colorScheme.outline),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
@@ -373,7 +390,7 @@ class _AskBox extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    color: theme.colorScheme.onSurfaceVariant,
+                    color: Colors.grey,
                     fontSize: 16,
                   ),
                 ),

@@ -16,8 +16,6 @@ class _CropPageState extends State<CropPage> {
   static const _ch = MethodChannel('image_cropper');
 
   bool _launched = false;
-  bool _loading = false;
-  String? _error;
 
   @override
   void initState() {
@@ -28,32 +26,21 @@ class _CropPageState extends State<CropPage> {
   Future<void> _openCameraAndSend() async {
     if (_launched) return;
     _launched = true;
-    setState(() {
-      _error = null;
-      _loading = true;
-    });
 
     try {
       final res = await _ch.invokeMapMethod<String, dynamic>('cameraAndCrop');
       if (!mounted) return;
 
+      // Nếu người dùng huỷ hoặc lib trả về null -> thoát trang này luôn (không để lại “trang trắng”)
       if (res == null) {
-        setState(() {
-          _error = 'Không nhận được dữ liệu từ hệ thống.';
-          _loading = false;
-          _launched = false;
-        });
+        _leaveThisPage();
         return;
       }
 
       final b64  = res['base64'] as String?;
-      final mime = (res['mime'] as String?) ?? 'image/jpeg';
+      final mime = (res['mime'] as String?) ?? 'image/png';
       if (b64 == null || b64.isEmpty) {
-        setState(() {
-          _error = 'Ảnh rỗng hoặc không hợp lệ.';
-          _loading = false;
-          _launched = false;
-        });
+        _leaveThisPage();
         return;
       }
 
@@ -61,11 +48,19 @@ class _CropPageState extends State<CropPage> {
       await _submitToApi(dataUrl);
     } on PlatformException catch (e) {
       if (!mounted) return;
-      setState(() {
-        _error = e.message ?? 'Đã xảy ra lỗi không xác định.';
-        _loading = false;
-        _launched = false;
-      });
+
+      // Bắt case cancel từ native (“CAMERA_CANCEL”, “GALLERY_CANCEL”, có thể là “CROP_ERROR” do user back)
+      final code = e.code.toUpperCase();
+      if (code.contains('CANCEL')) {
+        _leaveThisPage();
+        return;
+      }
+
+      // Lỗi khác -> cũng rời trang, không để người dùng mắc kẹt ở CropPage trắng
+      _leaveThisPage();
+    } catch (_) {
+      if (!mounted) return;
+      _leaveThisPage();
     }
   }
 
@@ -95,46 +90,55 @@ class _CropPageState extends State<CropPage> {
         final status = json['status'] as String?;
 
         if (status == 'success' && taskId != null) {
-          // ✅ Sang trang hiển thị kết quả (không dính bottom bar)
-          if (!mounted) return;
+          // Thay thế CropPage bằng trang kết quả ⇒ back sẽ KHÔNG quay về CropPage trắng
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (_) => SolveResultPage(taskId: taskId)),
           );
           return;
-        } else {
-          setState(() {
-            _error = 'Phản hồi không hợp lệ (status=$status).';
-            _loading = false;
-            _launched = false;
-          });
         }
-      } else {
-        setState(() {
-          _error = 'Gọi API lỗi (HTTP ${resp.statusCode}). Thông điệp: ${resp.body}';
-          _loading = false;
-          _launched = false;
-        });
       }
-    } catch (e) {
+
+      // Bất kỳ lỗi/response không hợp lệ -> không để người dùng ở lại CropPage trắng
+      _leaveThisPage();
+    } catch (_) {
       if (!mounted) return;
-      setState(() {
-        _error = 'Lỗi mạng: $e';
-        _loading = false;
-        _launched = false;
-      });
+      _leaveThisPage();
+    }
+  }
+
+  void _leaveThisPage() {
+    // Pop nếu còn trang phía sau; nếu không thì thay bằng HomePage
+    if (Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
+    } else {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const HomePage()),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 520),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+    // Trang này chỉ là “trạm trung chuyển” → show loader ngắn rồi tự biến mất
+    return WillPopScope(
+      onWillPop: () async {
+        _leaveThisPage(); // vuốt back → không quay về “trang trắng”, mà thoát hẳn CropPage
+        return false;     // chặn pop mặc định (đã tự xử lý ở trên)
+      },
+      child: Scaffold(
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 520),
+              child: const Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 12),
+                  Text('Đang mở camera...'),
+                ],
+              ),
             ),
           ),
         ),

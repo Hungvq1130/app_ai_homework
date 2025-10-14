@@ -6,7 +6,7 @@ class AskPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Đặt câu hỏi')),
+      appBar: AppBar(),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: TextField(
@@ -15,7 +15,6 @@ class AskPage extends StatelessWidget {
           decoration: InputDecoration(
             hintText: 'Nhập câu hỏi của bạn…',
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-            prefixIcon: const Icon(Icons.search),
           ),
           onSubmitted: (q) {
             // TODO: xử lý tìm kiếm / gửi câu hỏi

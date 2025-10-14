@@ -51,18 +51,17 @@ public final class ImageCropperBridge {
             if (pendingResult == null) return;
 
             if (result.isSuccessful()) {
-                String filePath = result.getUriFilePath(activity, true);
-                Uri uri = result.getUriContent();
-
-                String finalPath = filePath;
-                if (finalPath == null && uri != null) {
-                    finalPath = copyUriToCache(uri);
-                }
-
-                if (finalPath != null) {
-                    deliverResult(finalPath); // ← trả path + base64
+                Uri uri = result.getUriContent(); // ⬅️ dùng Uri nội bộ của Cropper
+                if (uri != null) {
+                    deliverResultFromUri(uri);     // ⬅️ trả base64 từ Uri, KHÔNG lưu path
                 } else {
-                    pendingResult.error("CROP_EMPTY", "No image returned", null);
+                    // (tuỳ chọn) fallback nếu lib chỉ trả file path tạm nội bộ
+                    String filePath = result.getUriFilePath(activity, /*includeStoragePermissions*/ false);
+                    if (filePath != null) {
+                        deliverResultFromFilePathOnce(filePath); // chỉ đọc 1 lần, không lưu thêm
+                    } else {
+                        pendingResult.error("CROP_EMPTY", "No image returned", null);
+                    }
                 }
             } else {
                 Exception e = result.getError();
@@ -70,6 +69,7 @@ public final class ImageCropperBridge {
             }
             pendingResult = null;
         });
+
 
         // 2) Nhận ảnh từ CameraCaptureActivity (camera tuỳ biến)
         cameraLauncher = activity.registerForActivityResult(
@@ -110,6 +110,27 @@ public final class ImageCropperBridge {
         );
     }
 
+    /** Đọc file tạm do cropper tạo (nếu lib chỉ trả path). KHÔNG copy, KHÔNG lưu thêm. */
+    private void deliverResultFromFilePathOnce(String filePath) {
+        try {
+            int[] wh = new int[2];
+            String b64 = encodeBase64ScaledFromPathOnce(filePath, /*maxDim*/1600, wh);
+            String mime = "image/png";
+
+            Log.d(TAG, "deliverResultFromFilePathOnce: w=" + wh[0] + " h=" + wh[1] + " len=" + (b64 != null ? b64.length() : 0));
+
+            Map<String, Object> payload = new HashMap<>();
+            payload.put("base64", b64);
+            payload.put("mime", mime);
+            payload.put("width", wh[0]);
+            payload.put("height", wh[1]);
+            pendingResult.success(payload);
+        } catch (Exception e) {
+            pendingResult.error("ENCODE_ERROR", e.getMessage(), null);
+        }
+    }
+
+
     public void configureChannel(FlutterEngine engine) {
         new MethodChannel(engine.getDartExecutor().getBinaryMessenger(), CHANNEL)
                 .setMethodCallHandler((call, result) -> {
@@ -144,48 +165,58 @@ public final class ImageCropperBridge {
         options.outputCompressQuality = 90;
         return options;
     }
-
-    private String copyUriToCache(Uri uri) {
-        try {
-            String name = "CROP_" + System.currentTimeMillis() + ".jpg";
-            File outFile = new File(activity.getCacheDir(), name);
-            try (InputStream in = activity.getContentResolver().openInputStream(uri);
-                 OutputStream out = new FileOutputStream(outFile)) {
-                byte[] buf = new byte[8192];
-                int n;
-                while ((n = in.read(buf)) > 0) out.write(buf, 0, n);
-                out.flush();
-            }
-            return outFile.getAbsolutePath();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    /** Tạo payload trả về: path + base64 (đã nén/resize an toàn) */
-    private void deliverResult(String filePath) {
+    private void deliverResultFromUri(Uri uri) {
         try {
             int[] wh = new int[2];
-            String b64 = encodeBase64Scaled(filePath, /*maxDim*/1600, /*quality*/85, wh);
+            String b64 = encodeBase64ScaledFromUri(uri, /*maxDim*/1600, wh);
             String mime = "image/png";
-            String dataUrl = "data:" + mime + ";base64," + b64;
 
-            // 🔥 Logcat: in theo từng khúc để không bị cắt
-            logLong(TAG, "dataUrl=" + dataUrl);
+            // (tuỳ chọn) log gọn để tránh spam logcat
+            Log.d(TAG, "deliverResultFromUri: w=" + wh[0] + " h=" + wh[1] + " len=" + (b64 != null ? b64.length() : 0));
 
             Map<String, Object> payload = new HashMap<>();
             payload.put("base64", b64);
             payload.put("mime", mime);
             payload.put("width", wh[0]);
             payload.put("height", wh[1]);
-            // (tuỳ bạn) payload.put("path", filePath);
-
             pendingResult.success(payload);
         } catch (Exception e) {
             pendingResult.error("ENCODE_ERROR", e.getMessage(), null);
         }
     }
+
+    private String encodeBase64ScaledFromPathOnce(String path, int maxDim, int[] outWH) throws Exception {
+        // Pass 1
+        BitmapFactory.Options o = new BitmapFactory.Options();
+        o.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(path, o);
+        int w = o.outWidth, h = o.outHeight;
+        if (w <= 0 || h <= 0) throw new Exception("Invalid image bounds");
+
+        // inSampleSize
+        int inSample = 1;
+        int maxSide = Math.max(w, h);
+        while (maxSide / inSample > maxDim) inSample *= 2;
+
+        // Pass 2
+        BitmapFactory.Options o2 = new BitmapFactory.Options();
+        o2.inSampleSize = inSample;
+        Bitmap bmp = BitmapFactory.decodeFile(path, o2);
+        if (bmp == null) throw new Exception("Decode bitmap failed");
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bmp.compress(Bitmap.CompressFormat.PNG, 100, baos);
+        if (outWH != null && outWH.length >= 2) {
+            outWH[0] = bmp.getWidth();
+            outWH[1] = bmp.getHeight();
+        }
+        bmp.recycle();
+
+        byte[] bytes = baos.toByteArray();
+        return Base64.encodeToString(bytes, Base64.NO_WRAP);
+    }
+
+
 
     private static void logLong(String tag, String msg) {
         if (msg == null) return;
@@ -196,32 +227,30 @@ public final class ImageCropperBridge {
         }
     }
 
-    /**
-     * Đọc ảnh từ path, decode có inSampleSize để giới hạn cạnh dài <= maxDim,
-     * sau đó nén JPEG quality và trả base64 (NO_WRAP).
-     */
-    private String encodeBase64Scaled(String path, int maxDim, int quality, int[] outWH) throws Exception {
-        // 1) Đọc kích thước thật
+    private String encodeBase64ScaledFromUri(Uri uri, int maxDim, int[] outWH) throws Exception {
         BitmapFactory.Options o = new BitmapFactory.Options();
         o.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(path, o);
-        int w = o.outWidth;
-        int h = o.outHeight;
+        try (InputStream in = activity.getContentResolver().openInputStream(uri)) {
+            BitmapFactory.decodeStream(in, null, o);
+        }
+        int w = o.outWidth, h = o.outHeight;
+        if (w <= 0 || h <= 0) throw new Exception("Invalid image bounds");
 
-        // 2) Tính inSampleSize
         int inSample = 1;
         int maxSide = Math.max(w, h);
         while (maxSide / inSample > maxDim) inSample *= 2;
 
-        // 3) Decode với inSampleSize
         BitmapFactory.Options o2 = new BitmapFactory.Options();
         o2.inSampleSize = inSample;
-        Bitmap bmp = BitmapFactory.decodeFile(path, o2);
+
+        Bitmap bmp;
+        try (InputStream in2 = activity.getContentResolver().openInputStream(uri)) {
+            bmp = BitmapFactory.decodeStream(in2, null, o2);
+        }
         if (bmp == null) throw new Exception("Decode bitmap failed");
 
-        // 4) Nén JPEG
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bmp.compress(Bitmap.CompressFormat.PNG, quality, baos);
+        bmp.compress(Bitmap.CompressFormat.PNG, 100, baos); // PNG: quality bị bỏ qua
         if (outWH != null && outWH.length >= 2) {
             outWH[0] = bmp.getWidth();
             outWH[1] = bmp.getHeight();
@@ -231,4 +260,5 @@ public final class ImageCropperBridge {
         byte[] bytes = baos.toByteArray();
         return Base64.encodeToString(bytes, Base64.NO_WRAP);
     }
+
 }
