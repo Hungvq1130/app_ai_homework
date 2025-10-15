@@ -92,7 +92,7 @@ class _CropPageState extends State<CropPage> {
         if (status == 'success' && taskId != null) {
           // Thay thế CropPage bằng trang kết quả ⇒ back sẽ KHÔNG quay về CropPage trắng
           Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (_) => SolveResultPage(taskId: taskId)),
+            MaterialPageRoute(builder: (_) => SolveResultPage(taskId: taskId,problemImageDataUrl: dataUrl)),
           );
           return;
         }
@@ -136,7 +136,6 @@ class _CropPageState extends State<CropPage> {
                 children: [
                   CircularProgressIndicator(),
                   SizedBox(height: 12),
-                  Text('Đang mở camera...'),
                 ],
               ),
             ),
