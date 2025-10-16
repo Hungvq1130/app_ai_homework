@@ -22,47 +22,55 @@ class SolveResultPage extends StatefulWidget {
 class _SolveResultPageState extends State<SolveResultPage> {
   // ---------- Config ----------
   static const _taskBaseUrl = 'https://ai-gateway.oneadx.com/v1/tasks/';
-  static const _searchEndpoint = 'http://192.168.1.14:3000/search';
+  static const _searchEndpoint = 'http://192.168.68.70:3001/api/search';
 
   // ---------- State ----------
   String? _markdown;
   String? _error;
   String? _tStatus; // pending / assigned / completed
   bool _loading = false;
+  String? _baiGiaiHtml;
 
   // ---------- Utils ----------
   String _normalize(String s) => s.replaceAll('\r\n', '\n');
 
   void _logEscaped(String label, String text) {
     debugPrint('$label (escaped): ${jsonEncode(text)}');
-    debugPrint('$label length: ${text.length}');
   }
 
   /// Tái cấu trúc phần "Đề bài":
-  /// - Di chuyển "mô tả" trước heading "## Đề bài" vào trong khối Đề bài.
-  /// - CẮT thân Đề bài (không render), gọi onProblemRemoved để log/gửi API.
-  /// - Chèn ảnh đề bài (nếu có).
+  /// - **Bỏ** toàn bộ phần mô tả trước "## Đề bài" (không hiển thị).
+  /// - **Cắt** thân "Đề bài" (không hiển thị), gọi onProblemRemoved để log/gửi API.
+  /// - **Chỉ chèn ảnh** đề bài (nếu có) ngay dưới heading.
   String _composeProblemSection(
       String md, {
         String? imageUrl,
-        void Function(String preludeMoved)? onPreludeMoved,
         void Function(String problemRemoved)? onProblemRemoved,
       }) {
     final s = _normalize(md);
 
-    // Heading "## Đề bài"
-    final headRe = RegExp(r'^\s{0,3}#{1,6}\s*đề\s*bài\s*$', caseSensitive: false, multiLine: true);
+    // Tìm heading "## Đề bài"
+    final headRe = RegExp(
+      r'^\s{0,3}#{1,6}\s*đề\s*bài\s*$',
+      caseSensitive: false,
+      multiLine: true,
+    );
     final mHead = headRe.firstMatch(s);
-    if (mHead == null) return s; // Không có Đề bài → để nguyên
 
+    if (mHead == null) {
+      // Không có Đề bài → nếu có ảnh thì tạo khối mới với ảnh; giữ nguyên phần còn lại
+      if ((imageUrl ?? '').isNotEmpty) {
+        return '## Đề bài\n\n![]($imageUrl)\n\n$s';
+      }
+      return s;
+    }
+
+    // headStart: bắt đầu heading; headEnd: kết thúc heading
     final headStart = mHead.start;
     final headEnd = mHead.end;
 
-    // (1) Mô tả trước heading
-    final prelude = s.substring(0, headStart).trim();
-    if (prelude.isNotEmpty) onPreludeMoved?.call(prelude);
-
-    // (2) Xác định thân Đề bài: sau heading → trước "***" hoặc heading kế
+    // (1) BỎ mô tả trước heading: không chèn vào đâu cả
+    // (2) Xác định thân "Đề bài": sau heading → trước "***" hoặc heading tiếp theo
     int from = headEnd;
     while (from < s.length && (s[from] == '\n' || s[from] == ' ' || s[from] == '\t')) from++;
 
@@ -79,24 +87,23 @@ class _SolveResultPageState extends State<SolveResultPage> {
       if (abs < end) end = abs;
     }
 
+    // (3) Lấy thân Đề bài để log/gửi API, sau đó loại khỏi render
     final problemBody = s.substring(from, end)
         .replaceFirst(RegExp(r'^\n+'), '')
         .replaceFirst(RegExp(r'\s+$'), '');
     if (problemBody.isNotEmpty) onProblemRemoved?.call(problemBody);
 
-    // (3) Lắp lại: heading + prelude (nếu có) + ảnh (nếu có) + phần sau
+    // (4) Lắp lại tài liệu:
+    // - BỎ phần trước heading (mô tả)
+    // - GIỮ heading "## Đề bài"
+    // - CHỈ chèn ảnh (nếu có)
+    // - Giữ phần sau end (***, Phương pháp, Bài giải…)
     final headLine = s.substring(headStart, headEnd);
     final after = s.substring(end);
 
     final buf = StringBuffer()
       ..writeln(headLine)
       ..writeln();
-
-    if (prelude.isNotEmpty) {
-      buf
-        ..writeln(prelude)
-        ..writeln();
-    }
 
     if ((imageUrl ?? '').isNotEmpty) {
       buf
@@ -108,6 +115,41 @@ class _SolveResultPageState extends State<SolveResultPage> {
     return buf.toString();
   }
 
+  void _logBaiGiaiFromSearchResponse(String body) {
+    try {
+      final obj = jsonDecode(body);
+      final data = obj['data'];
+      if (data is List && data.isNotEmpty) {
+        final first = data.first as Map<String, dynamic>;
+        final baiGiai = (first['baiGiai'] ?? '') as String;
+        if (baiGiai.isNotEmpty) {
+          debugPrint('SEARCH API baiGiai (escaped): ${jsonEncode(baiGiai)}');
+          debugPrint('SEARCH API baiGiai length: ${baiGiai.length}');
+
+          // 👉 Lưu và mở trang HTML theo template DB
+          if (mounted) {
+            setState(() => _baiGiaiHtml = baiGiai);
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => MathHtmlPage.dbHtml(
+                  html: _baiGiaiHtml!,   // HTML thuần
+                  title: 'Lời giải (DB)',// tuỳ chỉnh
+                ),
+              ),
+            );
+          }
+        } else {
+          debugPrint('SEARCH API: không có baiGiai trong phần tử đầu tiên.');
+        }
+      } else {
+        debugPrint('SEARCH API: data rỗng hoặc không phải List.');
+      }
+    } catch (e) {
+      debugPrint('SEARCH API parse error: $e');
+    }
+  }
+
+
   Future<void> _sendProblemToAnotherApi(String problemText) async {
     final query = problemText.trim();
     _logEscaped('SEARCH API query', query);
@@ -117,7 +159,6 @@ class _SolveResultPageState extends State<SolveResultPage> {
     }
 
     final payload = {'query': query};
-    debugPrint('SEARCH API payload: ${jsonEncode(payload)}');
 
     try {
       final res = await http
@@ -126,14 +167,18 @@ class _SolveResultPageState extends State<SolveResultPage> {
         headers: {'Content-Type': 'application/json; charset=utf-8'},
         body: jsonEncode(payload),
       )
-          .timeout(const Duration(seconds: 15));
+          .timeout(const Duration(seconds: 600));
 
       debugPrint('SEARCH API status: ${res.statusCode}');
-      debugPrint('SEARCH API response: ${res.body}');
+      // 👉 Log riêng baiGiai
+      _logBaiGiaiFromSearchResponse(res.body);
     } catch (e) {
       debugPrint('SEARCH API error: $e');
     }
   }
+
+
+
 
   // ---------- Lifecycle ----------
   @override
@@ -146,9 +191,7 @@ class _SolveResultPageState extends State<SolveResultPage> {
       md = _composeProblemSection(
         md,
         imageUrl: widget.problemImageDataUrl,
-        onPreludeMoved: (p) => _logEscaped('PRELUDE_MOVED', p),
         onProblemRemoved: (pb) {
-          _logEscaped('DE BAI_REMOVED', pb);
           _sendProblemToAnotherApi(pb);
         },
       );
@@ -189,7 +232,6 @@ class _SolveResultPageState extends State<SolveResultPage> {
             md = _composeProblemSection(
               md,
               imageUrl: widget.problemImageDataUrl,
-              onPreludeMoved: (p) => _logEscaped('PRELUDE_MOVED', p),
               onProblemRemoved: (pb) {
                 _logEscaped('DE BAI_REMOVED', pb);
                 _sendProblemToAnotherApi(pb);
@@ -198,7 +240,7 @@ class _SolveResultPageState extends State<SolveResultPage> {
 
             if (!mounted) return;
             setState(() {
-              _markdown = md; // Đề bài = ảnh + (mô tả nếu có); Phương pháp/Bài giải giữ nguyên
+              _markdown = md; // Đề bài = CHỈ ẢNH; Phương pháp/Bài giải giữ nguyên
               _loading = false;
             });
             break;
@@ -234,6 +276,8 @@ class _SolveResultPageState extends State<SolveResultPage> {
       if (delay.inSeconds < 5) delay = Duration(seconds: delay.inSeconds + 1);
     }
   }
+
+
 
   // ---------- UI ----------
   @override
