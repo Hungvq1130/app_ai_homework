@@ -29,27 +29,16 @@ class MathHtmlPage extends StatefulWidget {
     isHtml: false,
   );
 
-  /// Dùng riêng cho DB (template mới, render Markdown)
-  factory MathHtmlPage.db({
-    required String markdown,
-    String? title,
-  }) => MathHtmlPage(
-    markdown: markdown,
-    htmlTemplate: kMathHtmlDb,
-    title: title ?? 'Lời giải (DB)',
-    isHtml: false,
-  );
-
   /// ✅ Render **HTML thuần** trên template DB
-  factory MathHtmlPage.dbHtml({
-    required String html,
-    String? title,
-  }) => MathHtmlPage(
-    markdown: html,
-    htmlTemplate: kMathHtmlDb,
-    title: title ?? 'Lời giải (DB)',
-    isHtml: true,            // ⬅️ báo là HTML
-  );
+  // factory MathHtmlPage.dbHtml({
+  //   required String html,
+  //   String? title,
+  // }) => MathHtmlPage(
+  //   markdown: html,
+  //   htmlTemplate: kMathHtmlDb,
+  //   title: title ?? 'Lời giải (DB)',
+  //   isHtml: true,            // ⬅️ báo là HTML
+  // );
 
   @override
   State<MathHtmlPage> createState() => _MathHtmlPageState();
@@ -97,6 +86,7 @@ class _MathHtmlPageState extends State<MathHtmlPage> {
       ..loadHtmlString(widget.htmlTemplate);
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -125,3 +115,4 @@ String _normalizeHtml(String s) {
       .replaceAll(r'\u003E', '>')
       .replaceAll('&amp;', '&'); // giữ &lt; &gt; vì có thể là markup hợp lệ
 }
+
