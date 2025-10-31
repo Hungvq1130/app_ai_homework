@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:solve_exercise/terms_policies.dart';
 import 'package:solve_exercise/utility.dart';
-import 'about_us.dart'; // ⬅️ THÊM
+import 'FAQ_page.dart';
+import 'about_us.dart';
+import 'language_page.dart'; // ⬅️ THÊM
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({
@@ -52,11 +55,22 @@ class SettingsPage extends StatelessWidget {
                         ),
                   ),
                   SizedBox(height: vGap),
-                  _SettingsTile(title: 'Câu hỏi thường gặp', onTap: onFaq ?? () {}),
+                  _SettingsTile(title: 'Câu hỏi thường gặp', onTap: onFaq ?? () => Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const FaqPage()),
+                        ),
+                  ),
                   SizedBox(height: vGap),
-                  _SettingsTile(title: 'Điều khoản & Chính sách', onTap: onTerms ?? () {}),
+                  _SettingsTile(title: 'Điều khoản & Chính sách', onTap: onTerms ?? ()  => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const TermsMenuPage()),
+                  ),
+                  ),
                   SizedBox(height: vGap),
-                  _SettingsTile(title: 'Ngôn ngữ', onTap: onLanguage ?? () {}),
+                  _SettingsTile(title: 'Ngôn ngữ', onTap: onLanguage ?? () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const LanguagePage()),
+                  ),),
                   SizedBox(height: vGap * 1.2),
 
                   _ShareCard(

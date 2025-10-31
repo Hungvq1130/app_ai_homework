@@ -51,7 +51,7 @@ class _SplashScreenState extends State<SplashScreen> {
             child: const _FadedLogo(
               asset: 'assets/splash/fi_617333.png',
               widthFactor: 0.36,
-              opacity: 0.7, // tăng/giảm nếu muốn
+              opacity: 1, // tăng/giảm nếu muốn
             ),
           ),
           // logo2: phải giữa
@@ -61,7 +61,7 @@ class _SplashScreenState extends State<SplashScreen> {
             child: const _FadedLogo(
               asset: 'assets/splash/fi_3360739.png',
               widthFactor: 0.28,
-              opacity: 0.7,
+              opacity: 1,
             ),
           ),
           // logo3: dưới trái
@@ -71,7 +71,7 @@ class _SplashScreenState extends State<SplashScreen> {
             child: const _FadedLogo(
               asset: 'assets/splash/fi_171322.png',
               widthFactor: 0.26,
-              opacity: 0.7,
+              opacity: 1,
             ),
           ),
 
