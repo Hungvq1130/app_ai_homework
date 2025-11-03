@@ -2,6 +2,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:solve_exercise/utility.dart';
+import 'history_detail_page.dart';
 import 'history_store.dart';
 import 'math_html_page.dart';
 import '../main.dart' show routeObserver; // ⬅️ import routeObserver
@@ -56,18 +57,36 @@ class HistoryTabState extends State<HistoryTab> with RouteAware {
   }
 
   Widget _leadingThumb(SolvedItem it) {
+    const double kThumb = 56;
+    const BorderRadius kBR = BorderRadius.all(Radius.circular(12));
+
     final path = it.imagePath;
-    if (path != null && path.isNotEmpty) {
-      final f = File(path);
-      if (f.existsSync()) {
-        return ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: Image.file(f, width: 56, height: 56, fit: BoxFit.cover),
-        );
-      }
+    if (path != null && path.isNotEmpty && File(path).existsSync()) {
+      // Ảnh thumbnail
+      return SizedBox(
+        width: kThumb, height: kThumb,
+        child: ClipRRect(
+          borderRadius: kBR,
+          child: Image.file(File(path), fit: BoxFit.cover),
+        ),
+      );
     }
-    return const CircleAvatar(child: Icon(Icons.description));
+
+    // Placeholder khi không có ảnh: vẫn 56×56
+    return SizedBox(
+      width: kThumb, height: kThumb,
+      child: DecoratedBox(
+        decoration: const BoxDecoration(
+          color: Color(0xFFEFF4FF),
+          borderRadius: kBR,
+        ),
+        child: const Center(
+          child: Icon(Icons.description, size: 28, color: Color(0xFF1E3A8A)),
+        ),
+      ),
+    );
   }
+
 
   double _bottomOverlapPadding(BuildContext context) {
     final sysInset = MediaQuery.of(context).padding.bottom;
@@ -169,10 +188,10 @@ class HistoryTabState extends State<HistoryTab> with RouteAware {
                           await HistoryStore.remove(it.id);
                           refresh();
                         },
-                        child: ListTile(
-                          leading: _leadingThumb(it),
-                          title: Text(title, maxLines: 2, overflow: TextOverflow.ellipsis),
-                          subtitle: Text(preview, maxLines: 2, overflow: TextOverflow.ellipsis),
+                        child: _HistoryItemCard(
+                          leading: _leadingThumb(it),    // đã trả về 56x56 (như mình gửi trước)
+                          title: title,
+                          subtitle: preview,
                           onTap: () {
                             Navigator.of(context).push(
                               MaterialPageRoute(builder: (_) => HistoryDetailPage(item: it)),
@@ -192,14 +211,76 @@ class HistoryTabState extends State<HistoryTab> with RouteAware {
   }
 }
 
-class HistoryDetailPage extends StatelessWidget {
-  final SolvedItem item;
-  const HistoryDetailPage({super.key, required this.item});
+class _HistoryItemCard extends StatelessWidget {
+  const _HistoryItemCard({
+    required this.leading,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  final Widget leading;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: MathHtmlPage(markdown: item.markdown),
+    final theme = Theme.of(context);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE8E8EE)),
+        boxShadow: const [
+          BoxShadow(blurRadius: 10, offset: Offset(0, 3), color: Color(0x12000000)),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: onTap,
+          child: SizedBox(
+            height: kHistoryItemHeight,                 // 🔒 chiều cao cố định
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center, // canh giữa dọc
+                children: [
+                  SizedBox(width: 56, height: 56, child: leading),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center, // canh giữa block text
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          maxLines: 2, overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w500),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          subtitle,
+                          maxLines: 1, overflow: TextOverflow.ellipsis, // 1 dòng để không tăng chiều cao
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: Colors.black.withOpacity(.65),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
+const double kHistoryItemHeight = 90;
+

@@ -6,7 +6,7 @@ import 'onboarding_page.dart';
 
 /// === ĐỔI ĐƯỜNG DẪN Ở ĐÂY CHO TIỆN ===
 /// Logo: để null sẽ hiện ô xám placeholder
-const String? _kLogoAssetPath = null; // ví dụ: 'assets/logo.png'
+const String? _kLogoAssetPath = 'assets/logo/logo.png';
 const String  _kHeroAssetPath = 'assets/onboarding/onboarding1.png';
 
 class OnboardingWelcomePage extends StatelessWidget {
@@ -36,45 +36,24 @@ class OnboardingWelcomePage extends StatelessWidget {
               child: Column(
                 children: [
                   SizedBox(height: topGap),
-
-                  // --- Logo (ô xám hoặc ảnh logo) ---
-                  if (_kLogoAssetPath == null)
-                    Container(
-                      width: size.width * 0.28,
-                      height: size.width * 0.28,
-                      decoration: BoxDecoration(
-                        color: Colors.black12,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    )
-                  else
                     ClipRRect(
                       borderRadius: BorderRadius.circular(12),
                       child: Image.asset(
-                        _kLogoAssetPath!,
-                        width: size.width * 0.28,
-                        height: size.width * 0.28,
+                        _kLogoAssetPath!, // đảm bảo bạn set biến này trước khi build
+                        width: size.width * 0.35,
+                        height: size.width * 0.35,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Container(
-                          width: size.width * 0.28,
-                          height: size.width * 0.28,
-                          color: Colors.black12,
-                          alignment: Alignment.center,
-                          child: const Text('Logo?', style: TextStyle(color: Colors.black45)),
-                        ),
+                        errorBuilder: (_, __, ___) => const SizedBox.shrink(), // không hiện ô xám
                       ),
                     ),
-
-                  SizedBox(height: size.height * 0.03),
-
                   // --- Tiêu đề ---
                   Text(
                     'Chào mừng đến với\nHọc Bá AI',
                     textAlign: TextAlign.center,
                     style: theme.textTheme.headlineMedium?.copyWith(
                       fontSize: titleSize,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.black87,
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xFF27335C),
                       height: 1.25,
                     ),
                   ),

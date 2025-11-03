@@ -13,6 +13,9 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen> {
   bool _visible = false;
 
+  // ✅ Đường dẫn logo lớn (PNG trong suốt) – thay bằng của bạn
+  static const String kBigLogoAsset = 'assets/logo/logo_big.png';
+
   @override
   void initState() {
     super.initState();
@@ -24,7 +27,7 @@ class _SplashScreenState extends State<SplashScreen> {
     if (!mounted) return;
     setState(() => _visible = true);
 
-    await Future.delayed(const Duration(seconds: 2));
+    await Future.delayed(const Duration(seconds: 3));
     if (!mounted) return;
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(builder: (_) => const OnboardingWelcomePage()),
@@ -33,9 +36,13 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final size = MediaQuery.of(context).size;
-    // Khoảng cách responsive giữa TextLogo và tagline (24–56 px)
-    final double gapPx = (size.height * 0.05).clamp(250.0, 300.0);
+
+    // Kích thước & khoảng cách theo ảnh mẫu
+    final double logoSide = (size.width * 0.8).clamp(320.0, 380.0);
+    final double titleGap = (size.height * 0.02).clamp(16.0, 24.0);
+    final double subGap = 8.0;
 
     return Scaffold(
       body: Stack(
@@ -43,42 +50,42 @@ class _SplashScreenState extends State<SplashScreen> {
           // Nền gradient thương hiệu
           const SoftGradientBackground(includeBaseLayer: true),
 
-          // ===== Logos PNG đã xoay sẵn (không xoay nữa) =====
-          // logo1: trên trái
+          // ===== Icon mờ trang trí (trắng, theo ảnh) =====
+          // Biểu đồ tròn – góc trên trái
           Positioned(
-            left: -size.width * 0.01,
-            top: size.height * 0.10,
-            child: const _FadedLogo(
+            left: -size.width * 0.02,
+            top: size.height * 0.08,
+            child: const _FadedIcon(
               asset: 'assets/splash/fi_617333.png',
               widthFactor: 0.36,
-              opacity: 1, // tăng/giảm nếu muốn
+              opacity: 0.25,
             ),
           ),
-          // logo2: phải giữa
+          // Thước – phải giữa
           Positioned(
-            right: size.width * 0.01,
-            top: size.height * 0.46,
-            child: const _FadedLogo(
+            right: size.width * 0.02,
+            top: size.height * 0.42,
+            child: const _FadedIcon(
               asset: 'assets/splash/fi_3360739.png',
-              widthFactor: 0.28,
-              opacity: 1,
+              widthFactor: 0.30,
+              opacity: 0.22,
             ),
           ),
-          // logo3: dưới trái
+          // Quyển sách – dưới trái
           Positioned(
             left: size.width * 0.06,
             bottom: size.height * 0.10,
-            child: const _FadedLogo(
+            child: const _FadedIcon(
               asset: 'assets/splash/fi_171322.png',
               widthFactor: 0.26,
-              opacity: 1,
+              opacity: 0.22,
             ),
           ),
 
-          // ===== TextLogo + Tagline =====
+          // ===== Logo lớn + tiêu đề + tagline =====
           Center(
             child: AnimatedScale(
-              scale: _visible ? 1.0 : 0.9,
+              scale: _visible ? 1.0 : 0.92,
               duration: const Duration(milliseconds: 800),
               curve: Curves.easeOutBack,
               child: AnimatedOpacity(
@@ -88,32 +95,44 @@ class _SplashScreenState extends State<SplashScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // "TextLogo"
-                    RichText(
-                      text: TextSpan(
-                        style: DefaultTextStyle.of(context)
-                            .style
-                            .copyWith(fontSize: 36, color: Colors.black),
-                        children: const [
-                          TextSpan(
-                            text: 'Text',
-                            style: TextStyle(fontWeight: FontWeight.w800),
-                          ),
-                          TextSpan(
-                            text: 'Logo',
-                            style: TextStyle(fontWeight: FontWeight.w500),
-                          ),
-                        ],
+                    // Logo lớn (thay TextLogo cũ)
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(20),
+                      child: Image.asset(
+                        kBigLogoAsset,
+                        width: logoSide,
+                        height: logoSide,
+                        fit: BoxFit.contain,
+                        errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                        filterQuality: FilterQuality.high,
                       ),
                     ),
-                    SizedBox(height: gapPx),
+
+                    SizedBox(height: titleGap),
+
                     Text(
-                      'Bài Nào Khó\nCó AI Lo!',
+                      'Học Bá AI',
                       textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        height: 1.24,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black87,
+                      style: theme.textTheme.headlineMedium?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 54,               // gần với mẫu
+                        letterSpacing: .2,
+                        color: const Color(0xFF27335C), // xanh đậm như ảnh
+                        height: 1.1,
+                      ),
+                    ),
+
+                    SizedBox(height: subGap),
+
+                    // Tagline: "Bài tập khó, có AI lo!"
+                    Text(
+                      'Bài tập khó, có AI lo!',
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 24,
+                        color: Colors.black54,
+                        height: 1.25,
                       ),
                     ),
                   ],
@@ -127,16 +146,16 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 }
 
-/// Logo trắng mờ, kích thước theo tỉ lệ chiều rộng màn hình, KHÔNG xoay.
-class _FadedLogo extends StatelessWidget {
+/// Icon trắng mờ, kích thước theo tỉ lệ chiều rộng màn hình.
+class _FadedIcon extends StatelessWidget {
   final String asset;
   final double widthFactor; // tỉ lệ theo size.width
   final double opacity;
 
-  const _FadedLogo({
+  const _FadedIcon({
     required this.asset,
     required this.widthFactor,
-    this.opacity = 0.5,
+    this.opacity = 0.25,
   });
 
   @override
@@ -144,15 +163,15 @@ class _FadedLogo extends StatelessWidget {
     final w = MediaQuery.of(context).size.width;
     final s = w * widthFactor;
 
-    return Opacity(
-      opacity: opacity,
-      child: Image.asset(
-        asset,
-        width: s,
-        height: s,
-        fit: BoxFit.contain,
-        filterQuality: FilterQuality.high,
-      ),
+    return Image.asset(
+      asset,
+      width: s,
+      height: s,
+      fit: BoxFit.contain,
+      // tô trắng và giảm opacity để giống ảnh mẫu
+      color: Colors.white.withOpacity(opacity),
+      colorBlendMode: BlendMode.srcATop,
+      filterQuality: FilterQuality.high,
     );
   }
 }

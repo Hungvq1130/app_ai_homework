@@ -39,45 +39,76 @@ class SettingsPage extends StatelessWidget {
           const SoftGradientBackground(includeBaseLayer: true),
           SafeArea(
             child: SingleChildScrollView(
-              padding: EdgeInsets.fromLTRB(side, topGap, side, side),
+              // ❌ bỏ topGap ở đây để ảnh không bị đẩy xuống
+              padding: EdgeInsets.only(bottom: side),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  SizedBox(height: heroH, child: Image.asset(heroAsset, fit: BoxFit.contain)),
+                  // Ảnh full width, không nhận padding
+                  Image.asset(
+                    heroAsset,
+                    width: double.infinity,
+                    fit: BoxFit.fitWidth, // full theo chiều ngang, không crop
+                    // Nếu muốn fill & chấp nhận crop: dùng BoxFit.cover + chiều cao cố định
+                    // height: 240, fit: BoxFit.cover,
+                  ),
+
                   SizedBox(height: vGap),
 
-                  _SettingsTile(
-                    title: 'Về chúng tôi',
-                    onTap: onAbout ??
-                            () => Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const AboutUsPage()),
+                  // ✅ Chỉ padding cho phần settings
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(side, topGap, side, 0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _SettingsTile(
+                          title: 'Về chúng tôi',
+                          onTap: onAbout ??
+                                  () => Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (_) => const AboutUsPage()),
+                              ),
                         ),
-                  ),
-                  SizedBox(height: vGap),
-                  _SettingsTile(title: 'Câu hỏi thường gặp', onTap: onFaq ?? () => Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const FaqPage()),
-                        ),
-                  ),
-                  SizedBox(height: vGap),
-                  _SettingsTile(title: 'Điều khoản & Chính sách', onTap: onTerms ?? ()  => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const TermsMenuPage()),
-                  ),
-                  ),
-                  SizedBox(height: vGap),
-                  _SettingsTile(title: 'Ngôn ngữ', onTap: onLanguage ?? () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const LanguagePage()),
-                  ),),
-                  SizedBox(height: vGap * 1.2),
+                        SizedBox(height: vGap),
 
-                  _ShareCard(
-                    title: 'Chia sẻ với bạn bè',
-                    subtitle: 'Hoàn thành bài tập cùng nhau',
-                    buttonText: 'Chia sẻ',
-                    onPressed: onShare ?? () {},
+                        _SettingsTile(
+                          title: 'Câu hỏi thường gặp',
+                          onTap: onFaq ??
+                                  () => Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (_) => const FaqPage()),
+                              ),
+                        ),
+                        SizedBox(height: vGap),
+
+                        _SettingsTile(
+                          title: 'Điều khoản & Chính sách',
+                          onTap: onTerms ??
+                                  () => Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (_) => const TermsMenuPage()),
+                              ),
+                        ),
+                        SizedBox(height: vGap),
+
+                        _SettingsTile(
+                          title: 'Ngôn ngữ',
+                          onTap: onLanguage ??
+                                  () => Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (_) => const LanguagePage()),
+                              ),
+                        ),
+                        SizedBox(height: vGap * 1.2),
+
+                        _ShareCard(
+                          title: 'Chia sẻ với bạn bè',
+                          subtitle: 'Hoàn thành bài tập cùng nhau',
+                          buttonText: 'Chia sẻ',
+                          onPressed: onShare ?? () {},
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -86,6 +117,7 @@ class SettingsPage extends StatelessWidget {
         ],
       ),
     );
+
   }
 }
 

@@ -15,7 +15,6 @@ const String kMathHtml = r'''<!doctype html>
         processEscapes: true,
         tags: 'ams'
       },
-      chtml: { linebreaks: { automatic: true, width: 'container' }, scale: 1 },
       options: { renderActions: { addMenu: [] } }
     };
   </script>
@@ -34,13 +33,26 @@ const String kMathHtml = r'''<!doctype html>
       --c-step:#f59e0b;         /* Bước */
     }
     * { box-sizing: border-box; }
-    html, body { max-width: 100%; overflow-x: hidden; }
+    html, body {
+  max-width:100%;
+  overflow-x:hidden;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+}
+.content { overflow:visible; }
+
     body {
       font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial;
       line-height: 1.65; margin: 0; background: var(--bg); color: var(--text);
     }
-    .wrap { max-width: 860px; margin: 0 auto; padding: 16px; }
-    .content { background: var(--card); padding: 14px; border-radius: 12px; box-shadow: var(--shadow); }
+    .wrap { max-width: 860px; margin: 0 auto; padding: 0; }      /* bỏ padding để không lặp khoảng trắng */
+.content{
+  background: transparent;   /* HỦY card giữa */
+  border-radius: 0;
+  box-shadow: none;
+  padding: 0;                 /* để .sec tự canh lề bằng margin của nó */
+  border: 0;
+}
 
     h1,h2,h3 { margin: 1rem 0 .5rem; color: var(--muted); }
     p { margin: .5rem 0; }

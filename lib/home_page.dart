@@ -10,6 +10,7 @@ import 'history_tab.dart';
 import 'menu_tab.dart';
 import 'settings_page.dart';
 import 'dart:math' as math;
+import 'package:flutter/services.dart';
 
 class HomePage extends StatefulWidget {
   // Nếu muốn mở app vào Trang chủ, set mặc định = 1
@@ -60,26 +61,26 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      extendBody: true,
-
-      body: IndexedStack(index: _index, children: _pages),
-
-      bottomNavigationBar: EqualBottomBar(
-        currentIndex: _index,
-        onChanged: _onTabChanged,
-        items: const [
-          BarItem(label: 'Lịch sử',   icon: Icons.history_outlined,  selectedIcon: Icons.history_rounded),
-          BarItem(label: 'Trang chủ', icon: Icons.home_outlined,     selectedIcon: Icons.home_rounded),
-          BarItem(label: 'Cài đặt',   icon: Icons.settings_outlined, selectedIcon: Icons.settings_rounded),
-        ],
-      ),
+    return Stack(
+      children: [
+        const SoftGradientBackground(includeBaseLayer: true),
+        Scaffold(
+          backgroundColor: Colors.transparent,
+          body: IndexedStack(index: _index, children: _pages),
+          bottomNavigationBar: EqualBottomBar(
+            currentIndex: _index,
+            onChanged: _onTabChanged,
+            items: const [
+              BarItem(label: 'Lịch sử',   icon: Icons.history_outlined,  selectedIcon: Icons.history_rounded),
+              BarItem(label: 'Trang chủ', icon: Icons.home_outlined,     selectedIcon: Icons.home_rounded),
+              BarItem(label: 'Cài đặt',   icon: Icons.settings_outlined, selectedIcon: Icons.settings_rounded),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
-
-
-
 
 /// ----------------- TRANG CHỦ (Responsive) -----------------
 class TrangChuTab extends StatefulWidget {
@@ -115,30 +116,28 @@ class _TrangChuTabState extends State<TrangChuTab> {
 
     final q = _controller.text.trim();
     if (q.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Vui lòng nhập nội dung câu hỏi')),
-      );
+      _showError('Vui lòng nhập nội dung câu hỏi');
       return;
     }
 
+    // Đóng bàn phím trước khi chuyển trang
     FocusScope.of(context).unfocus();
+    SystemChannels.textInput.invokeMethod('TextInput.hide');
+
     setState(() => _loading = true);
 
     try {
       final body = {
         "language": "Vietnamese",
         "content": q,
-        "subject": "math", // TODO: thay bằng dropdown nếu cần
+        "subject": "math",
         "time": DateTime.now().millisecondsSinceEpoch,
         "api_key": _apiKey,
       };
 
       final resp = await http.post(
         Uri.parse(_apiUrl),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
+        headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
         body: jsonEncode(body),
       );
 
@@ -146,19 +145,27 @@ class _TrangChuTabState extends State<TrangChuTab> {
         final data = jsonDecode(resp.body);
         final status = data['status']?.toString();
         final taskId = data['task_id']?.toString();
-
         if (status == 'success' && taskId != null && taskId.isNotEmpty) {
           if (!mounted) return;
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (_) => SolveResultPage(
-                taskId: taskId,
-                // nếu SolveResultPage của bạn KHÔNG có originalQuestion thì bỏ dòng đó
-                // originalQuestion: q,
-              ),
-            ),
-          );
+
+          // Xoá text ngay (để khi quay về input trống)
           _controller.clear();
+
+          // 👇 Đợi trang kết quả đóng
+          await Navigator.of(context).push(MaterialPageRoute(
+            builder: (_) => SolveResultPage(
+              taskId: taskId,
+              originalQuestion: q,
+              problemImageDataUrl: null,
+            ),
+          ));
+
+          if (!mounted) return;
+
+          // 👇 Khi quay về: chắc chắn tắt focus + ẩn bàn phím
+          _focusNode.unfocus();
+          FocusScope.of(context).unfocus();
+          SystemChannels.textInput.invokeMethod('TextInput.hide');
         } else {
           _showError('Gửi câu hỏi thất bại: ${data['message'] ?? 'Không nhận được task_id'}');
         }
@@ -171,6 +178,8 @@ class _TrangChuTabState extends State<TrangChuTab> {
       if (mounted) setState(() => _loading = false);
     }
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -265,7 +274,7 @@ class _TrangChuTabState extends State<TrangChuTab> {
         Positioned(
           left: hPad,
           right: hPad + sideW + sideGap,
-          bottom: bottomBarH + sysBottom + 12,
+          bottom: sysBottom + 12,
           child: _BottomAskBarInput(
             controller: _controller,
             focusNode: _focusNode,
@@ -278,7 +287,7 @@ class _TrangChuTabState extends State<TrangChuTab> {
         // 👉 Nút Crop giữ nguyên
         Positioned(
           right: hPad,
-          bottom: bottomBarH + sysBottom + 12,
+          bottom: sysBottom + 12,
           child: _RectSideButton(
             width: sideW,
             height: askBarH,
