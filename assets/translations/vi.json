@@ -1,0 +1,229 @@
+{
+  "language_page": {
+    "title": "Ngôn ngữ",
+    "apply_continue": "Áp dụng & tiếp tục",
+    "english": "Tiếng Anh",
+    "vietnamese": "Tiếng Việt"
+  },
+  "common": {
+    "back": "Quay lại",
+    "apply": "Áp dụng",
+    "continue": "Tiếp tục",
+    "unknown": "Không rõ"
+  },
+  "home": {
+    "title": "Trang chủ"
+  },
+  "settings": {
+    "about": "Về chúng tôi",
+    "faq": "Câu hỏi thường gặp",
+    "terms_policies": "Điều khoản & Chính sách",
+    "language": "Ngôn ngữ",
+    "share_card": {
+      "title": "Chia sẻ với bạn bè",
+      "subtitle": "Hoàn thành bài tập cùng nhau",
+      "button": "Chia sẻ"
+    }
+  },
+  "nav": {
+    "history": "Lịch sử",
+    "home": "Trang chủ",
+    "settings": "Cài đặt"
+  },
+  "home_tab": {
+    "title": "Giải bài tập AI",
+    "subtitle": "Nhập câu hỏi cho tất cả các môn học dưới dạng văn bản",
+    "input_hint": "Gửi đề bài bạn muốn Học Bá AI giải",
+    "suggestions": {
+      "berlin_wall": "Tại sao Bức tường\nBerlin được xây dựng?",
+      "alliteration": "Điệp âm là gì?"
+    },
+    "errors": {
+      "empty": "Vui lòng nhập nội dung câu hỏi",
+      "send_failed": "Gửi câu hỏi thất bại: {message}",
+      "server_error": "Máy chủ trả về mã lỗi {code}",
+      "cannot_send": "Không thể gửi câu hỏi: {error}"
+    }
+  },
+  "history": {
+    "page_title": "Lịch sử giải bài",
+    "empty": "Chưa có mục nào trong lịch sử.\nKéo xuống để làm mới.",
+    "clear_all": "Xoá tất cả",
+    "dialog": {
+      "title": "Xoá tất cả lịch sử?",
+      "content": "Thao tác này không thể hoàn tác.",
+      "cancel": "Huỷ",
+      "delete": "Xoá"
+    },
+    "item": {
+      "solved_at": "Bài giải lúc {time}"
+    }
+  },
+  "about": {
+    "h1": "Học Bá AI là gì?",
+    "p1": "Học Bá AI là ứng dụng giải bài tập nhưng không phải để làm bài hộ. Không phải để rút ngắn đường học bằng lối tắt. Mà để trở thành một “trợ lý học tập thông minh”, luôn kiên nhẫn giải thích, hướng dẫn từng bước và giúp người học tự hiểu bài.",
+    "h2": "Câu chuyện về Học Bá AI",
+    "p2": "Trước khi trở thành những người làm công nghệ, chúng tôi cũng từng là những học sinh ham học – ham chơi, từng mất hàng giờ loay hoay với những bài tập hack não. Chúng tôi hiểu rằng mỗi người có cách học khác nhau, và không ai nên bị ép đi theo một lối học duy nhất.\n\nTừ trải nghiệm đó, Học Bá AI ra đời — như một trợ lý học tập thông minh luôn ở bên, giúp bạn hiểu bài theo cách phù hợp nhất với chính mình. Không phải để làm bài hộ, mà để biến bài khó thành cơ hội học thông minh hơn.",
+    "bullets": {
+      "b1": "👉 Học dễ hơn với bài giải mẫu chi tiết.",
+      "b2": "👉 Hiểu sâu hơn khi nắm rõ phương pháp giải.",
+      "b3": "👉 Học mọi lúc mọi nơi chỉ với chiếc điện thoại nhỏ."
+    }
+  },
+  "onboarding": {
+    "slide1": {
+      "title": "Làm chủ tư duy từng môn học",
+      "subtitle": "Gặp bài tập khó, mở app là có ngay lời giải & phương pháp giải"
+    },
+    "slide2": {
+      "title": "Lời giải chính xác và chi tiết",
+      "subtitle": "Mỗi người có cách học khác nhau. Học Bá AI tôn trọng sự khác biệt ấy, mang đến trải nghiệm học tập phù hợp với từng cá nhân, giúp bạn học theo cách của chính mình."
+    },
+    "slide3": {
+      "title": "Ôn luyện mỗi ngày",
+      "subtitle": "Phương pháp giải logic kèm bài tập tương tự để tự luyện tập"
+    },
+    "button": {
+      "continue": "Tiếp tục",
+      "start": "Bắt đầu ngay"
+    }
+  },
+  "faq": {
+    "title": "Câu hỏi thường gặp",
+    "q1": "Học Bá AI có giải giúp toàn bộ bài tập không?",
+    "a1": "Không. Học Bá AI được thiết kế để hỗ trợ quá trình học tập của người dùng. Khi bạn nhập một bài tập, hệ thống AI sẽ phân tích đề bài, đưa ra gợi ý hướng giải, giải thích từng bước một và cung cấp đáp án tham khảo nếu có. Mục tiêu chính là giúp bạn hiểu bản chất kiến thức và phương pháp giải, từ đó có thể tự áp dụng vào những bài tương tự.",
+    "q2": "Sử dụng Học Bá AI để làm bài tập có bị coi là gian lận không?",
+    "a2": "Nếu bạn dùng Học Bá AI như một công cụ hỗ trợ học tập để hiểu cách giải, kiểm tra lại bài làm hoặc học thêm phương pháp mới thì đó là cách sử dụng đúng đắn và hợp pháp. Tuy nhiên, nếu bạn sao chép kết quả Học Bá AI tạo ra và nộp như bài làm của mình, đặc biệt là trong các kỳ kiểm tra, đánh giá hoặc bài tập được chấm điểm, thì điều đó có thể bị coi là gian lận học thuật theo quy định của nhà trường.",
+    "q3": "Dữ liệu bài tập của tôi có bị lưu hoặc chia sẻ không?",
+    "a3": "Chúng tôi có thể lưu trữ một phần thông tin về lịch sử truy vấn và nội dung bài tập để cải thiện chất lượng phản hồi của Học Bá AI, giúp hệ thống học và hỗ trợ bạn tốt hơn. Tuy nhiên, những thông tin này được ẩn danh và mã hóa, không lưu kèm thông tin cá nhân nhận dạng cụ thể nếu không cần thiết.",
+    "q4": "Học Bá AI có đảm bảo kết quả luôn chính xác không?",
+    "a4": "Không có hệ thống AI nào đạt độ chính xác tuyệt đối 100%. Các đáp án và lời giải do ứng dụng cung cấp chỉ mang tính hỗ trợ và tham khảo, có thể có sai sót hoặc cách giải chưa hoàn toàn tối ưu. Bạn nên sử dụng kết quả này như một nguồn tham khảo để so sánh, kiểm chứng với cách làm của bản thân hoặc tài liệu chính thống.",
+    "q5": "Tôi có thể sử dụng ứng dụng trong giờ kiểm tra không?",
+    "a5": "Không. Học Bá AI tuyệt đối không được sử dụng trong các kỳ thi, bài kiểm tra hoặc bất kỳ hình thức đánh giá chính thức nào mà không có sự cho phép của nhà trường hoặc giáo viên phụ trách. Mục đích của ứng dụng là giúp bạn học và rèn luyện kiến thức, không phải cung cấp “đáp án hộ” trong các tình huống kiểm tra."
+  },
+  "privacy": {
+    "title": "Chính sách bảo mật",
+    "sections": {
+      "collect": {
+        "title": "Thông tin thu thập",
+        "intro": "Chúng tôi có thể thu thập các loại thông tin sau:",
+        "b1": "Thông tin tài khoản (tên đăng nhập, email, mật khẩu đã mã hoá);",
+        "b2": "Dữ liệu sử dụng (câu hỏi gửi lên, lịch sử truy vấn, thống kê học tập);",
+        "b3": "Dữ liệu thiết bị (loại thiết bị, trình duyệt, IP);",
+        "b4": "Chúng tôi có thể sử dụng cookie để lưu thông tin đăng nhập, tuỳ chỉnh trải nghiệm và thống kê mức độ tương tác của người dùng."
+      },
+      "purpose": {
+        "title": "Mục đích sử dụng thông tin",
+        "b1": "Cung cấp và cải thiện trải nghiệm sử dụng Ứng dụng;",
+        "b2": "Hỗ trợ kỹ thuật, phản hồi người dùng;",
+        "b3": "Nghiên cứu và phát triển sản phẩm;",
+        "b4": "Đảm bảo bảo toàn và phát hiện hành vi lạm dụng hệ thống."
+      },
+      "security": {
+        "title": "Bảo mật và lưu trữ",
+        "body": "Dữ liệu người dùng được mã hoá và lưu trữ trên máy chủ bảo mật. Chúng tôi áp dụng các biện pháp kỹ thuật và tổ chức hợp lý để ngăn chặn truy cập trái phép, mất mát hoặc rò rỉ thông tin."
+      },
+      "sharing": {
+        "title": "Chia sẻ thông tin",
+        "intro": "Chúng tôi không bán hoặc cho thuê thông tin cá nhân cho bên thứ ba. Thông tin chỉ được chia sẻ khi:",
+        "b1": "Có sự đồng ý của người dùng;",
+        "b2": "Theo yêu cầu của cơ quan nhà nước có thẩm quyền;",
+        "b3": "Phục vụ vận hành kỹ thuật của Ứng dụng (ví dụ: dịch vụ lưu trữ đám mây)."
+      },
+      "rights": {
+        "title": "Quyền của người dùng",
+        "b1": "Truy cập, chỉnh sửa hoặc xoá thông tin cá nhân;",
+        "b2": "Yêu cầu ngừng xử lý dữ liệu cho mục đích phân tích;",
+        "b3": "Rút lại sự đồng ý bất cứ lúc nào (trong phạm vi pháp luật cho phép)."
+      },
+      "changes": {
+        "title": "Thay đổi chính sách",
+        "body": "Chính sách này có thể được cập nhật định kỳ. Mọi thay đổi sẽ được hiển thị trên ứng dụng."
+      }
+    }
+  },
+  "terms": {
+    "title": "Điều khoản dịch vụ",
+    "intro": "Chào mừng bạn đến với ứng dụng Học Bá AI. Khi truy cập hoặc sử dụng Ứng dụng, bạn đồng ý tuân thủ và bị ràng buộc bởi các Điều khoản Dịch vụ này.",
+    "sections": {
+      "purpose": {
+        "title": "Mục đích sử dụng",
+        "intro": "Ứng dụng cung cấp các tính năng hỗ trợ học tập bằng trí tuệ nhân tạo (AI), bao gồm nhưng không giới hạn ở:",
+        "b1": "Gợi ý hướng giải và gợi ý cách giải bài tập;",
+        "b2": "Cung cấp đáp án tham khảo;",
+        "b3": "Hỗ trợ người học rèn luyện và nâng cao kiến thức."
+      },
+      "not_replace_learning": "Ứng dụng KHÔNG nhằm mục đích thay thế cho quá trình học tập, làm bài; không phục vụ gian lận học thuật.",
+      "user": {
+        "title": "Trách nhiệm người dùng",
+        "b1": "Không sử dụng Ứng dụng để gian lận trong thi cử, làm bài kiểm tra hoặc vi phạm quy định học đường;",
+        "b2": "Không khai thác, phát tán hoặc sử dụng nội dung do AI tạo ra vào các mục đích trái pháp luật hoặc gian lận học thuật;",
+        "b3": "Chịu hoàn toàn trách nhiệm về mọi hậu quả phát sinh từ việc sử dụng Ứng dụng."
+      },
+      "students": {
+        "title": "Điều khoản dành riêng cho học sinh",
+        "s1": {
+          "title": "1. Mục đích giáo dục",
+          "body": "Ứng dụng được thiết kế nhằm hỗ trợ học sinh hiểu và làm chủ kiến thức, không phải để thay thế quá trình học tập.",
+          "b1": "Tham khảo phương pháp giải;",
+          "b2": "Củng cố từng bước giải / kiến thức;",
+          "b3": "Nâng cao năng lực tư duy và tự phản biện."
+        },
+        "s2": {
+          "title": "2. Cam kết đạo đức học tập",
+          "b1": "Không dùng ứng dụng để nộp bài giải AI tạo ra như sản phẩm của mình;",
+          "b2": "Không vận dụng kết quả để lách các điều chỉnh chính sách kiểm tra/đánh giá;",
+          "b3": "Nỗ lực rèn luyện đạo đức học tập, chịu trách nhiệm với các nội dung đã nộp."
+        },
+        "s3": {
+          "title": "3. Kiểm soát và xử lý vi phạm",
+          "body": "Nhà trường hoặc tổ chức giáo dục có thể áp dụng các biện pháp kiểm tra, phát hiện hành vi gian lận liên quan đến việc sử dụng AI. Nếu phát hiện người dùng vi phạm, chúng tôi có quyền:",
+          "b1": "Cảnh báo, tạm khóa hoặc chấm dứt tài khoản;",
+          "b2": "Cung cấp thông tin cần thiết cho cơ quan/đơn vị giáo dục liên quan khi có yêu cầu hợp pháp;",
+          "b3": "Chấm dứt quyền truy cập khi vi phạm nghiêm trọng.",
+          "tail": "Người dùng vi phạm chịu hoàn toàn trách nhiệm trước quy định của nhà trường (nếu có)."
+        },
+        "s4": {
+          "title": "4. Khuyến khích sử dụng có trách nhiệm",
+          "body": "Chúng tôi khuyến khích học sinh:",
+          "b1": "Sử dụng AI như một trợ giảng cá nhân, không phải người làm bài hộ;",
+          "b2": "Tự kiểm chứng mọi kết quả do AI cung cấp;",
+          "b3": "Chủ động học hỏi, đặt câu hỏi, thảo luận thay vì phụ thuộc vào máy."
+        }
+      },
+      "disclaimer": {
+        "title": "Miễn trừ trách nhiệm",
+        "p1": "Việc sử dụng AI cần được thực hiện một cách có trách nhiệm, trung thực và minh bạch. Chúng tôi KHÔNG chịu trách nhiệm đối với bất kỳ thiệt hại nào phát sinh từ việc người dùng lạm dụng AI để gian lận học tập, vi phạm quy chế thi cử hoặc quy định của học đường.",
+        "p2": "Kết quả do AI cung cấp chỉ mang tính chất tham khảo. Người dùng cần kiểm chứng và chịu trách nhiệm về quyết định sử dụng."
+      },
+      "ip": {
+        "title": "Quyền sở hữu trí tuệ",
+        "body": "Mọi nội dung, thiết kế, nhãn hiệu, mã nguồn và công nghệ liên quan đến Ứng dụng thuộc quyền sở hữu của Công ty TNHH ONEADX."
+      },
+      "changes": {
+        "title": "Thay đổi điều khoản",
+        "body": "Chúng tôi có quyền cập nhật hoặc sửa đổi các Điều khoản này bất kỳ lúc nào. Mọi thay đổi sẽ có hiệu lực kể từ khi được đăng tải trên Ứng dụng."
+      }
+    }
+  },
+  "legal": {
+    "menu": {
+      "title": "Điều khoản & Chính sách",
+      "terms": "Điều khoản dịch vụ",
+      "privacy": "Chính sách bảo mật"
+    }
+  },
+  "onboarding_welcome": {
+    "title": "Chào mừng đến với\nHọc Bá AI",
+    "missing_hero": "Thiếu ảnh minh hoạ",
+    "agree_prefix": "Tôi đồng ý với các ",
+    "terms": "Điều khoản",
+    "and": " và ",
+    "privacy": "Chính sách bảo mật",
+    "cta": "Đồng ý & tiếp tục"
+  },
+  "splash": {
+    "brand": "Học Bá AI",
+    "tagline": "Bạn học, AI trợ giúp!"
+  }
+}

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart'; // ⬅️ THÊM
 import 'package:solve_exercise/terms_policies.dart';
 import 'package:solve_exercise/utility.dart';
 import 'FAQ_page.dart';
 import 'about_us.dart';
-import 'language_page.dart'; // ⬅️ THÊM
+import 'language_page.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({
@@ -26,11 +27,9 @@ class SettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final size  = MediaQuery.of(context).size;
-    final theme = Theme.of(context);
 
     final side   = (size.width * 0.06).clamp(14, 24).toDouble();
     final topGap = (size.height * 0.06).clamp(16, 32).toDouble();
-    final heroH  = (size.height * 0.34).clamp(220, 360).toDouble();
     final vGap   = (size.height * 0.018).clamp(10, 16).toDouble();
 
     return Scaffold(
@@ -39,30 +38,24 @@ class SettingsPage extends StatelessWidget {
           const SoftGradientBackground(includeBaseLayer: true),
           SafeArea(
             child: SingleChildScrollView(
-              // ❌ bỏ topGap ở đây để ảnh không bị đẩy xuống
               padding: EdgeInsets.only(bottom: side),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Ảnh full width, không nhận padding
                   Image.asset(
                     heroAsset,
                     width: double.infinity,
-                    fit: BoxFit.fitWidth, // full theo chiều ngang, không crop
-                    // Nếu muốn fill & chấp nhận crop: dùng BoxFit.cover + chiều cao cố định
-                    // height: 240, fit: BoxFit.cover,
+                    fit: BoxFit.fitWidth,
                   ),
-
                   SizedBox(height: vGap),
 
-                  // ✅ Chỉ padding cho phần settings
                   Padding(
                     padding: EdgeInsets.fromLTRB(side, topGap, side, 0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         _SettingsTile(
-                          title: 'Về chúng tôi',
+                          title: 'settings.about'.tr(),
                           onTap: onAbout ??
                                   () => Navigator.push(
                                 context,
@@ -72,7 +65,7 @@ class SettingsPage extends StatelessWidget {
                         SizedBox(height: vGap),
 
                         _SettingsTile(
-                          title: 'Câu hỏi thường gặp',
+                          title: 'settings.faq'.tr(),
                           onTap: onFaq ??
                                   () => Navigator.push(
                                 context,
@@ -82,7 +75,7 @@ class SettingsPage extends StatelessWidget {
                         SizedBox(height: vGap),
 
                         _SettingsTile(
-                          title: 'Điều khoản & Chính sách',
+                          title: 'settings.terms_policies'.tr(),
                           onTap: onTerms ??
                                   () => Navigator.push(
                                 context,
@@ -92,19 +85,27 @@ class SettingsPage extends StatelessWidget {
                         SizedBox(height: vGap),
 
                         _SettingsTile(
-                          title: 'Ngôn ngữ',
+                          title: 'settings.language'.tr(),
                           onTap: onLanguage ??
-                                  () => Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (_) => const LanguagePage()),
-                              ),
+                                  () async {
+                                // Mở trang chọn ngôn ngữ; LanguagePage tự setLocale.
+                                final changed = await Navigator.push<bool>(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const LanguagePage(
+                                      isOnboarding: false, // ⬅️ quay lại Settings sau khi áp dụng
+                                      nextRoute: null,
+                                    ),
+                                  ),
+                                );
+                              },
                         ),
                         SizedBox(height: vGap * 1.2),
 
                         _ShareCard(
-                          title: 'Chia sẻ với bạn bè',
-                          subtitle: 'Hoàn thành bài tập cùng nhau',
-                          buttonText: 'Chia sẻ',
+                          title: 'settings.share_card.title'.tr(),
+                          subtitle: 'settings.share_card.subtitle'.tr(),
+                          buttonText: 'settings.share_card.button'.tr(),
                           onPressed: onShare ?? () {},
                         ),
                       ],
@@ -117,24 +118,20 @@ class SettingsPage extends StatelessWidget {
         ],
       ),
     );
-
   }
 }
 
-/// Thẻ trắng bo góc, clip antiAlias, KHÔNG shadow đậm ở mép góc
 class _SettingsTile extends StatelessWidget {
   const _SettingsTile({required this.title, this.onTap});
-
   final String title;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Material(
-      color: Colors.white,                     // nền trắng sạch
-      borderRadius: BorderRadius.circular(12), // bo lớn như mock
-      clipBehavior: Clip.antiAlias,            // ⬅️ cắt chuẩn theo radius (hết “tối sẫm” ở góc)
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(12),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
         child: Padding(
@@ -144,7 +141,7 @@ class _SettingsTile extends StatelessWidget {
               Expanded(
                 child: Text(
                   title,
-                  style: theme.textTheme.titleMedium?.copyWith(
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     color: const Color(0xFF262A41),
                     fontWeight: FontWeight.w500,
                   ),
@@ -159,7 +156,6 @@ class _SettingsTile extends StatelessWidget {
   }
 }
 
-/// Thẻ "Chia sẻ với bạn bè" — nền trắng, không còn gradient nền
 class _ShareCard extends StatelessWidget {
   const _ShareCard({
     required this.title,
@@ -175,31 +171,27 @@ class _ShareCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Material(
-      color: Colors.white,                     // ⬅️ nền trắng
+      color: Colors.white,
       borderRadius: BorderRadius.circular(12),
-      clipBehavior: Clip.antiAlias,            // cắt gọn bo góc
+      clipBehavior: Clip.antiAlias,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
         child: Row(
           children: [
-            // text block
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    title,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w500,
-                      color: const Color(0xFF262A41),
-                    ),
-                  ),
+                  Text(title,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
+                        color: const Color(0xFF262A41),
+                      )),
                   const SizedBox(height: 6),
                   Text(
                     subtitle,
-                    style: theme.textTheme.bodySmall?.copyWith(
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: const Color(0x80262A41),
                       height: 1.25,
                     ),
@@ -208,13 +200,13 @@ class _ShareCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 12),
-            // nút gradient
             DecoratedBox(
               decoration: const BoxDecoration(
                 gradient: kAppBorderGradient,
                 borderRadius: BorderRadius.all(Radius.circular(18)),
               ),
               child: TextButton(
+                onPressed: onPressed,
                 style: TextButton.styleFrom(
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -222,10 +214,9 @@ class _ShareCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(18),
                   ),
                 ),
-                onPressed: onPressed,
                 child: Text(
                   buttonText,
-                  style: theme.textTheme.labelLarge?.copyWith(
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.w500,
                   ),

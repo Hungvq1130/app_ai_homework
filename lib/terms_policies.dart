@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:solve_exercise/privacy_policy_page.dart';
@@ -45,7 +46,7 @@ class TermsMenuPage extends StatelessWidget {
                       _BackButton(onTap: () => Navigator.pop(context)),
                       const SizedBox(width: 8),
                       Text(
-                        'Điều khoản & Chính sách',
+                        'legal.menu.title'.tr(),
                         style: theme.textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.w500,
                           color: titleColor,
@@ -57,7 +58,7 @@ class TermsMenuPage extends StatelessWidget {
 
                   // Tiles
                   _LegalTile(
-                    title: 'Điều khoản dịch vụ',
+                    title: 'legal.menu.terms'.tr(),
                     onTap: () {
                       Navigator.push(
                         context,
@@ -69,7 +70,7 @@ class TermsMenuPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   _LegalTile(
-                    title: 'Chính sách bảo mật',
+                    title: 'legal.menu.privacy'.tr(),
                     onTap: () {
                       Navigator.push(
                         context,

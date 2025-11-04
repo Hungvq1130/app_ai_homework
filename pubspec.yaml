@@ -39,6 +39,7 @@ dependencies:
   shared_preferences: ^2.2.2
   path_provider: ^2.1.4
   uuid: ^4.4.0
+  easy_localization: ^3.0.8
 
 dev_dependencies:
   flutter_test:
@@ -62,6 +63,7 @@ flutter:
     - assets/about/
     - assets/flags/
     - assets/logo/
+    - assets/translations/
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

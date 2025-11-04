@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart'; // ⬅️ i18n
 import 'package:solve_exercise/utility.dart'; // SoftGradientBackground
 
 class PrivacyPolicyPage extends StatelessWidget {
@@ -19,6 +20,33 @@ class PrivacyPolicyPage extends StatelessWidget {
     const purple = Color(0xFF2D2F79);
     const text   = Color(0xFF3A3F63);
 
+    // ⬇️ Bullets theo i18n (KHÔNG const để nhận cập nhật)
+    final collectBullets = <String>[
+      'privacy.sections.collect.b1'.tr(),
+      'privacy.sections.collect.b2'.tr(),
+      'privacy.sections.collect.b3'.tr(),
+      'privacy.sections.collect.b4'.tr(),
+    ];
+
+    final purposeBullets = <String>[
+      'privacy.sections.purpose.b1'.tr(),
+      'privacy.sections.purpose.b2'.tr(),
+      'privacy.sections.purpose.b3'.tr(),
+      'privacy.sections.purpose.b4'.tr(),
+    ];
+
+    final sharingBullets = <String>[
+      'privacy.sections.sharing.b1'.tr(),
+      'privacy.sections.sharing.b2'.tr(),
+      'privacy.sections.sharing.b3'.tr(),
+    ];
+
+    final rightsBullets = <String>[
+      'privacy.sections.rights.b1'.tr(),
+      'privacy.sections.rights.b2'.tr(),
+      'privacy.sections.rights.b3'.tr(),
+    ];
+
     return Scaffold(
       body: Stack(
         children: [
@@ -38,7 +66,7 @@ class PrivacyPolicyPage extends StatelessWidget {
                         child: _CircleBackButton(onTap: () => Navigator.pop(context)),
                       ),
                       Text(
-                        'Chính sách bảo mật',
+                        'privacy.title'.tr(), // ⬅️ i18n
                         textAlign: TextAlign.center,
                         style: theme.textTheme.titleLarge?.copyWith(
                           fontSize: titleSize,
@@ -57,63 +85,32 @@ class PrivacyPolicyPage extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _SectionTitle('Thông tin thu thập', size: hSize),
-                        _Body(
-                          'Chúng tôi có thể thu thập các loại thông tin sau:',
-                          bodySize: bodySize,
-                        ),
+                        _SectionTitle('privacy.sections.collect.title'.tr(), size: hSize),
+                        _Body('privacy.sections.collect.intro'.tr(), bodySize: bodySize),
                         const SizedBox(height: 6),
-                        _Bullets(items: const [
-                          'Thông tin tài khoản (tên đăng nhập, email, mật khẩu đã mã hoá);',
-                          'Dữ liệu sử dụng (câu hỏi gửi lên, lịch sử truy vấn, thống kê học tập);',
-                          'Dữ liệu thiết bị (loại thiết bị, trình duyệt, IP);',
-                          'Chúng tôi có thể sử dụng cookie để lưu thông tin đăng nhập, tuỳ chỉnh trải nghiệm và thống kê mức độ tương tác của người dùng.',
-                        ], bodySize: bodySize),
+                        _Bullets(items: collectBullets, bodySize: bodySize),
 
                         const SizedBox(height: 14),
-                        _SectionTitle('Mục đích sử dụng thông tin', size: hSize),
-                        _Bullets(items: const [
-                          'Cung cấp và cải thiện trải nghiệm sử dụng Ứng dụng;',
-                          'Hỗ trợ kỹ thuật, phản hồi người dùng;',
-                          'Nghiên cứu và phát triển sản phẩm;',
-                          'Đảm bảo bảo toàn và phát hiện hành vi lạm dụng hệ thống.',
-                        ], bodySize: bodySize),
+                        _SectionTitle('privacy.sections.purpose.title'.tr(), size: hSize),
+                        _Bullets(items: purposeBullets, bodySize: bodySize),
 
                         const SizedBox(height: 14),
-                        _SectionTitle('Bảo mật và lưu trữ', size: hSize),
-                        _Body(
-                          'Dữ liệu người dùng được mã hoá và lưu trữ trên máy chủ bảo mật. '
-                              'Chúng tôi áp dụng các biện pháp kỹ thuật và tổ chức hợp lý để ngăn chặn truy cập trái phép, mất mát hoặc rò rỉ thông tin.',
-                          bodySize: bodySize,
-                        ),
+                        _SectionTitle('privacy.sections.security.title'.tr(), size: hSize),
+                        _Body('privacy.sections.security.body'.tr(), bodySize: bodySize),
 
                         const SizedBox(height: 14),
-                        _SectionTitle('Chia sẻ thông tin', size: hSize),
-                        _Body(
-                          'Chúng tôi không bán hoặc cho thuê thông tin cá nhân cho bên thứ ba. Thông tin chỉ được chia sẻ khi:',
-                          bodySize: bodySize,
-                        ),
+                        _SectionTitle('privacy.sections.sharing.title'.tr(), size: hSize),
+                        _Body('privacy.sections.sharing.intro'.tr(), bodySize: bodySize),
                         const SizedBox(height: 6),
-                        _Bullets(items: const [
-                          'Có sự đồng ý của người dùng;',
-                          'Theo yêu cầu của cơ quan nhà nước có thẩm quyền;',
-                          'Phục vụ vận hành kỹ thuật của Ứng dụng (ví dụ: dịch vụ lưu trữ đám mây).',
-                        ], bodySize: bodySize),
+                        _Bullets(items: sharingBullets, bodySize: bodySize),
 
                         const SizedBox(height: 14),
-                        _SectionTitle('Quyền của người dùng', size: hSize),
-                        _Bullets(items: const [
-                          'Truy cập, chỉnh sửa hoặc xoá thông tin cá nhân;',
-                          'Yêu cầu ngừng xử lý dữ liệu cho mục đích phân tích;',
-                          'Rút lại sự đồng ý bất cứ lúc nào (trong phạm vi pháp luật cho phép).',
-                        ], bodySize: bodySize),
+                        _SectionTitle('privacy.sections.rights.title'.tr(), size: hSize),
+                        _Bullets(items: rightsBullets, bodySize: bodySize),
 
                         const SizedBox(height: 14),
-                        _SectionTitle('Thay đổi chính sách', size: hSize),
-                        _Body(
-                          'Chính sách này có thể được cập nhật định kỳ. Mọi thay đổi sẽ được hiển thị trên ứng dụng.',
-                          bodySize: bodySize,
-                        ),
+                        _SectionTitle('privacy.sections.changes.title'.tr(), size: hSize),
+                        _Body('privacy.sections.changes.body'.tr(), bodySize: bodySize),
                       ],
                     ),
                   ),
@@ -208,7 +205,11 @@ class _Bullets extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('•  ', style: TextStyle(fontWeight: FontWeight.w700, color: Color(0xFF2D2F79))),
+            const Text('•  ',
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF2D2F79),
+                )),
             Expanded(child: Text(t, style: style)),
           ],
         ),

@@ -56,12 +56,6 @@ class HistoryDetailPage extends StatelessWidget {
               icon: const Icon(Icons.arrow_back_ios_new_rounded),
               onPressed: () => Navigator.pop(context),
             ),
-            actions: const [
-              Padding(
-                padding: EdgeInsets.only(right: 8),
-                child: Icon(Icons.notifications_none_rounded),
-              ),
-            ],
           ),
           body: ListView(
             padding: const EdgeInsets.all(16),
@@ -76,7 +70,10 @@ class HistoryDetailPage extends StatelessWidget {
                 trailing: null,
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(12),
-                  child: MathHtmlPage(markdown: methodMd),
+                  child: MathHtmlPage(
+                    markdown: methodMd,
+                    maxHeight: MediaQuery.sizeOf(context).height * 0.9,
+                  ),
                 ),
               ),
               const SizedBox(height: 24),
@@ -97,7 +94,10 @@ class _QuestionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final hasImg = image != null && image!.isNotEmpty;
+
+    final hasImg = image != null && image!.trim().isNotEmpty;
+    final showText = text != null && text!.trim().isNotEmpty;
+    final showPlaceholder = !showText && !hasImg;
 
     return Container(
       decoration: BoxDecoration(
@@ -105,7 +105,7 @@ class _QuestionCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: const Color(0xFFE8E8EE)),
         boxShadow: const [
-          BoxShadow(blurRadius: 8, offset: Offset(0,3), color: Color(0x14000000)),
+          BoxShadow(blurRadius: 8, offset: Offset(0, 3), color: Color(0x14000000)),
         ],
       ),
       padding: const EdgeInsets.fromLTRB(14, 12, 14, 10),
@@ -133,21 +133,36 @@ class _QuestionCard extends StatelessWidget {
               ),
             ],
           ),
+
           const SizedBox(height: 8),
-          Text(
-            (text == null || text!.isEmpty) ? '— Không có nội dung đề bài.' : text!,
-            style: theme.textTheme.bodyMedium,
-          ),
+
+          // Chỉ hiện text khi có nội dung
+          if (showText)
+            Text(
+              text!.trim(),
+              style: theme.textTheme.bodyMedium,
+            ),
+
+          // Placeholder chỉ hiện khi không có text và không có ảnh
+          if (showPlaceholder)
+            Text(
+              '— Không có nội dung đề bài.',
+              style: theme.textTheme.bodyMedium,
+            ),
+
+          // Ảnh: nếu có text/placeholder phía trên thì chèn thêm khoảng cách 8px
           if (hasImg) ...[
-            const SizedBox(height: 8),
+            if (showText || showPlaceholder) const SizedBox(height: 8),
             _ProblemImage(image: image!),
           ],
+
           const SizedBox(height: 8),
         ],
       ),
     );
   }
 }
+
 
 /// ====== Card "Lời giải/Phương pháp" (khung trắng + shadow) ======
 class _MethodCard extends StatelessWidget {

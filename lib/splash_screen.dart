@@ -1,7 +1,9 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:solve_exercise/utility.dart';
 import 'package:solve_exercise/welcome_page.dart';
 import 'home_page.dart';
+import 'language_page.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -30,7 +32,7 @@ class _SplashScreenState extends State<SplashScreen> {
     await Future.delayed(const Duration(seconds: 3));
     if (!mounted) return;
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const OnboardingWelcomePage()),
+      MaterialPageRoute(builder: (_) => const LanguagePage()),
     );
   }
 
@@ -111,7 +113,7 @@ class _SplashScreenState extends State<SplashScreen> {
                     SizedBox(height: titleGap),
 
                     Text(
-                      'Học Bá AI',
+                      'splash.brand'.tr(),
                       textAlign: TextAlign.center,
                       style: theme.textTheme.headlineMedium?.copyWith(
                         fontWeight: FontWeight.w800,
@@ -126,7 +128,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
                     // Tagline: "Bài tập khó, có AI lo!"
                     Text(
-                      'Bài tập khó, có AI lo!',
+                      'splash.tagline'.tr(),
                       textAlign: TextAlign.center,
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w500,

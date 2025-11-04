@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart'; // ⬅️ THÊM
 import 'package:solve_exercise/utility.dart';
 
 // ==== ĐƯỜNG DẪN ẢNH (đổi theo file của bạn) ====
 const String kAboutMidHero = 'assets/about/abt_us2.png';
 const String kAboutBottomHero = 'assets/about/abt_us1.png';
-const String kIconHeaderSun = 'assets/about/light.png'; // 40x40 cạnh H1
-const String kIconLeftBook =
-    'assets/about/Group48.png'; // icon nhỏ bên trái đoạn 1
-const String kIconRightBackpack =
-    'assets/about/backpack.png'; // icon nhỏ bên phải đoạn 2
+const String kIconHeaderSun = 'assets/about/light.png';
+const String kIconLeftBook = 'assets/about/Group48.png';
+const String kIconRightBackpack = 'assets/about/backpack.png';
 
 class AboutUsPage extends StatelessWidget {
   const AboutUsPage({super.key});
@@ -25,7 +24,6 @@ class AboutUsPage extends StatelessWidget {
     final bodySize = (size.width * 0.040).clamp(13, 16).toDouble();
     final paraGap = (size.height * 0.018).clamp(10, 16).toDouble();
 
-    // Ảnh giữa to vừa, ảnh cuối to hơn 1 chút như mock
     final hero1MaxH = (size.height * 0.20).clamp(120, 180).toDouble();
     final hero2MaxH = (size.height * 0.28).clamp(170, 260).toDouble();
     final bulletStyle = theme.textTheme.bodyMedium?.copyWith(
@@ -43,13 +41,13 @@ class AboutUsPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // ===== H1 + icon mặt trời (40x40) =====
+                  // ===== H1 + icon mặt trời =====
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Flexible(
                         child: Text(
-                          'Học Bá AI là gì?',
+                          'about.h1'.tr(), // ⬅️ i18n
                           textAlign: TextAlign.center,
                           style: theme.textTheme.headlineSmall?.copyWith(
                             fontSize: h1,
@@ -64,12 +62,9 @@ class AboutUsPage extends StatelessWidget {
                     ],
                   ),
 
-                  // Đoạn 1 + icon nhỏ bên trái (lọt mép)
+                  // Đoạn 1 + icon nhỏ bên trái
                   ParagraphWithSideIcon(
-                    text:
-                        'Học Bá AI là ứng dụng giải bài tập nhưng không phải để làm bài hộ. '
-                        'Không phải để rút ngắn đường học bằng lối tắt. Mà để trở thành một “trợ lý học tập thông minh”, '
-                        'luôn kiên nhẫn giải thích, hướng dẫn từng bước và giúp người học tự hiểu bài.',
+                    text: 'about.p1'.tr(), // ⬅️ i18n
                     textStyle: theme.textTheme.bodyMedium?.copyWith(
                       fontSize: bodySize,
                       height: 1.45,
@@ -78,10 +73,8 @@ class AboutUsPage extends StatelessWidget {
                     side: AxisDirection.left,
                     iconPath: kIconLeftBook,
                     iconSize: const Size(48, 40),
-                    // đẩy icon ra ngoài mép trái 8px, nằm hơi cao hơn dòng đầu ~2px
                     offset: const Offset(10, 250),
                   ),
-
 
                   // Ảnh giữa
                   Center(
@@ -91,11 +84,10 @@ class AboutUsPage extends StatelessWidget {
                     ),
                   ),
 
-
                   // ===== H2 =====
                   Center(
                     child: Text(
-                      'Câu chuyện về Học bá AI',
+                      'about.h2'.tr(), // ⬅️ i18n
                       style: theme.textTheme.headlineSmall?.copyWith(
                         fontSize: h2,
                         fontWeight: FontWeight.w500,
@@ -105,15 +97,9 @@ class AboutUsPage extends StatelessWidget {
                     ),
                   ),
 
-                  // Đoạn 2 + icon nhỏ bên phải (lọt mép)
+                  // Đoạn 2 + icon nhỏ bên phải
                   ParagraphWithSideIcon(
-                    text:
-                        'Trước khi trở thành những người làm công nghệ, chúng tôi cũng từng là những học sinh ham học – ham chơi, '
-                        'từng mất hàng giờ loay hoay với những bài tập hack não. Chúng tôi hiểu rằng mỗi người có cách học khác nhau, '
-                        'và không ai nên bị ép đi theo một lối học duy nhất.\n\n'
-                        'Từ trải nghiệm đó, Học Bá AI ra đời — như một trợ lý học tập thông minh luôn ở bên, '
-                        'giúp bạn hiểu bài theo cách phù hợp nhất với chính mình. '
-                        'Không phải để làm bài hộ, mà để biến bài khó thành cơ hội học thông minh hơn.',
+                    text: 'about.p2'.tr(), // ⬅️ i18n
                     textStyle: theme.textTheme.bodyMedium?.copyWith(
                       fontSize: bodySize,
                       height: 1.45,
@@ -122,29 +108,19 @@ class AboutUsPage extends StatelessWidget {
                     side: AxisDirection.right,
                     iconPath: kIconRightBackpack,
                     iconSize: const Size(40, 45),
-                    // đẩy ra mép phải 6px, đặt thấp hơn đầu đoạn ~4px
                     offset: const Offset(-6, 160),
                   ),
 
                   SizedBox(height: paraGap),
 
-                  // --- Bullets (không dùng class, giữ đúng format 👉Nội dung) ---
-                  Text(
-                    '👉 Học dễ hơn với bài giải mẫu chi tiết.',
-                    style: bulletStyle,
-                  ),
+                  // Bullets
+                  Text('about.bullets.b1'.tr(), style: bulletStyle),
                   const SizedBox(height: 8),
-                  Text(
-                    '👉 Hiểu sâu hơn khi nắm rõ phương pháp giải.',
-                    style: bulletStyle,
-                  ),
+                  Text('about.bullets.b2'.tr(), style: bulletStyle),
                   const SizedBox(height: 8),
-                  Text(
-                    '👉 Học mọi lúc mọi nơi chỉ với chiếc điện thoại nhỏ.',
-                    style: bulletStyle,
-                  ),
+                  Text('about.bullets.b3'.tr(), style: bulletStyle),
 
-                  // Ảnh cuối (to hơn)
+                  // Ảnh cuối
                   Center(
                     child: ConstrainedBox(
                       constraints: BoxConstraints(maxHeight: hero2MaxH),
@@ -160,6 +136,7 @@ class AboutUsPage extends StatelessWidget {
     );
   }
 }
+
 
 /// Bullet “👉 …”
 class _Bullet extends StatelessWidget {

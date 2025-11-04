@@ -1,4 +1,6 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:solve_exercise/utility.dart'; // SoftGradientBackground + OnboardingGradientCard + kAppBorderGradient
 import 'home_page.dart';
 
@@ -14,39 +16,46 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
   int _index = 0;
 
   // === Chỉ cần đổi đường dẫn & text ở đây ===
-  final _pages = const [
+  final _pages = [
     _OBData(
       hero: 'assets/onboarding/onboarding3.png',
-      title: 'Làm chủ tư duy từng môn học',
-      subtitle: 'Gặp bài tập khó, mở app là có ngay lời giải & phương pháp giải',
-      button: 'Tiếp tục',
+      title: 'onboarding.slide1.title'.tr(),
+      subtitle: 'onboarding.slide1.subtitle'.tr(),
+      button: 'onboarding.button.continue'.tr(),
     ),
     _OBData(
       hero: 'assets/onboarding/onboarding2.png',
-      title: 'Lời giải chính xác và chi tiết',
-      subtitle: 'Mỗi người có cách học khác nhau. Học Bá AI tôn trọng sự khác biệt ấy, mang đến trải nghiệm học tập phù hợp với từng cá nhân, giúp bạn học theo cách của chính mình.',
-      button: 'Tiếp tục',
+      title: 'onboarding.slide2.title'.tr(),
+      subtitle: 'onboarding.slide2.subtitle'.tr(),
+      button: 'onboarding.button.continue'.tr(),
     ),
     _OBData(
       hero: 'assets/onboarding/calender1.png',
-      title: 'Ôn luyện mỗi ngày',
-      subtitle: 'Phương pháp giải logic kèm bài tập tương tự để tự luyện tập',
-      button: 'Bắt đầu ngay',
+      title: 'onboarding.slide3.title'.tr(),
+      subtitle: 'onboarding.slide3.subtitle'.tr(),
+      button: 'onboarding.button.start'.tr(),
     ),
   ];
 
-  void _next() {
+  void _next() async {
     if (_index < _pages.length - 1) {
       _controller.nextPage(
         duration: const Duration(milliseconds: 350),
         curve: Curves.easeOut,
       );
     } else {
+      // ✅ Kết thúc flow → đánh dấu đã hoàn tất
+      final sp = await SharedPreferences.getInstance();
+      await sp.setBool('onboarding_done', true);
+
+      // → HomePage
+      if (!mounted) return;
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => const HomePage()),
       );
     }
   }
+
 
   @override
   Widget build(BuildContext context) {

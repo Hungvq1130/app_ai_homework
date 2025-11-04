@@ -34,10 +34,12 @@ const String kMathHtml = r'''<!doctype html>
     }
     * { box-sizing: border-box; }
     html, body {
-  max-width:100%;
-  overflow-x:hidden;
-  overflow-y:auto;
-  -webkit-overflow-scrolling:touch;
+    max-width:100%;
+    min-height:100%;
+    overflow-x:hidden;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    touch-action: pan-y pan-x;
 }
 .content { overflow:visible; }
 

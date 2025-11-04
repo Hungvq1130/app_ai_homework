@@ -1,16 +1,19 @@
 import 'dart:convert';
-import 'dart:io';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart' show Factory;
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'k_math_database_html.dart';
 import 'k_math_html.dart';
 
 class MathHtmlPage extends StatefulWidget {
-  final String markdown;        // giữ tên cũ
+  final String markdown;
   final String htmlTemplate;
   final String title;
-  final bool isHtml;            // true = nạp HTML thuần, false = Markdown
+  final bool isHtml;
+
+  /// NEW: trần chiều cao (dp). Nếu null, mặc định = 0.7 * chiều cao màn hình.
+  final double? maxHeight;
 
   const MathHtmlPage({
     super.key,
@@ -18,16 +21,19 @@ class MathHtmlPage extends StatefulWidget {
     this.htmlTemplate = kMathHtml,
     this.title = 'Lời giải',
     this.isHtml = false,
+    this.maxHeight,
   });
 
   factory MathHtmlPage.ai({
     required String markdown,
     String? title,
+    double? maxHeight,
   }) => MathHtmlPage(
     markdown: markdown,
     htmlTemplate: kMathHtml,
     title: title ?? 'Lời giải (AI)',
     isHtml: false,
+    maxHeight: maxHeight,
   );
 
   @override
@@ -37,17 +43,17 @@ class MathHtmlPage extends StatefulWidget {
 class _MathHtmlPageState extends State<MathHtmlPage> with TickerProviderStateMixin {
   late final WebViewController _wc;
 
-  // Chiều cao nội dung (dp). Đặt min để tránh giật layout lần đầu.
+  // Chiều cao nội dung (dp) đo được từ JS
   double _contentHeight = 200;
+
+  // Reuse duy nhất 1 set gesture để TRÁNH lỗi "multiple recognizer factories"
+  static final Set<Factory<OneSequenceGestureRecognizer>> _kInsideWebView =
+  { Factory<EagerGestureRecognizer>(() => EagerGestureRecognizer()) };
+
 
   @override
   void initState() {
     super.initState();
-
-    if (Platform.isAndroid) {
-      // WebView.platform = SurfaceAndroidWebView(); // nếu project dùng plugin cũ, mở dòng này
-    }
-
     _wc = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(const Color(0x00000000))
@@ -57,29 +63,24 @@ class _MathHtmlPageState extends State<MathHtmlPage> with TickerProviderStateMix
         onMessageReceived: (JavaScriptMessage msg) {
           final h = double.tryParse(msg.message);
           if (h != null && h > 0 && (h - _contentHeight).abs() > 1) {
-            setState(() => _contentHeight = h.clamp(100, 100000).toDouble());
+            setState(() {
+              _contentHeight = h.clamp(100, 100000).toDouble(); // vẫn đo đầy đủ
+            });
           }
         },
       )
       ..setNavigationDelegate(
         NavigationDelegate(
           onPageFinished: (_) async {
-            // Bổ sung helpers (renderHtml + đo chiều cao + quan sát thay đổi)
             await _wc.runJavaScript(_injectResizeJs);
-
             final payload = jsonEncode(
-              widget.isHtml
-                  ? _normalizeHtml(widget.markdown)
-                  : _normalizeMarkdown(widget.markdown),
+              widget.isHtml ? _normalizeHtml(widget.markdown) : _normalizeMarkdown(widget.markdown),
             );
-
             if (widget.isHtml) {
               await _wc.runJavaScript('window.renderHtml($payload);');
             } else {
               await _wc.runJavaScript('window.renderMarkdown($payload);');
             }
-
-            // Gọi đo lần đầu
             await _wc.runJavaScript('window.__sendHeight && window.__sendHeight();');
           },
         ),
@@ -90,29 +91,36 @@ class _MathHtmlPageState extends State<MathHtmlPage> with TickerProviderStateMix
   @override
   void didUpdateWidget(covariant MathHtmlPage oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Khi nội dung đổi -> render lại và đo lại
     if (oldWidget.markdown != widget.markdown || oldWidget.isHtml != widget.isHtml) {
       final payload = jsonEncode(
         widget.isHtml ? _normalizeHtml(widget.markdown) : _normalizeMarkdown(widget.markdown),
       );
-      if (widget.isHtml) {
-        _wc.runJavaScript('window.renderHtml($payload); window.__sendHeight&&window.__sendHeight();');
-      } else {
-        _wc.runJavaScript('window.renderMarkdown($payload); window.__sendHeight&&window.__sendHeight();');
-      }
+      final js = widget.isHtml
+          ? 'window.renderHtml($payload);'
+          : 'window.renderMarkdown($payload);';
+      _wc.runJavaScript('$js window.__sendHeight && window.__sendHeight();');
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // KHÔNG bọc Scaffold, KHÔNG đặt gestureRecognizers dọc
-    // để ListView bên ngoài cuộn 1 mạch
+    final screenH = MediaQuery.sizeOf(context).height;
+    final double cap = (widget.maxHeight ?? screenH * 0.70).clamp(240.0, 1400.0).toDouble();
+    final double effectiveH = _contentHeight.clamp(160.0, cap).toDouble();
+
     return AnimatedSize(
       duration: const Duration(milliseconds: 160),
       curve: Curves.easeOutCubic,
       child: SizedBox(
-        height: _contentHeight,
-        child: WebViewWidget(controller: _wc),
+        height: effectiveH,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: WebViewWidget(
+            controller: _wc,
+            // ⬇️ Gesture trong vùng WebView sẽ đi thẳng vào WebView, cực mượt
+            gestureRecognizers: _kInsideWebView,
+          ),
+        ),
       ),
     );
   }
@@ -199,4 +207,3 @@ String _normalizeHtml(String s) {
       .replaceAll(r'\u003E', '>')
       .replaceAll('&amp;', '&'); // giữ &lt; &gt; vì có thể là markup hợp lệ
 }
-

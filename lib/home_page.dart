@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:solve_exercise/solve_result_page.dart';
@@ -25,7 +26,6 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   late int _index;
-  late List<Widget> _pages;
 
   // ⬇️ Key để gọi refresh() của HistoryTab
   final GlobalKey<HistoryTabState> _historyKey = GlobalKey<HistoryTabState>();
@@ -33,15 +33,8 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-
     // Nếu có incomingTaskId (vừa solve xong), ưu tiên nhảy sang tab Lịch sử
     _index = (widget.incomingTaskId != null) ? 0 : widget.initialIndex;
-
-    _pages = [
-      HistoryTab(key: _historyKey), // ⬅️ gắn key public state
-      const TrangChuTab(),
-      const SettingsPage(),
-    ];
 
     // Sau frame đầu, nếu đang đứng ở tab Lịch sử thì tự refresh
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -61,19 +54,38 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    // ⬇️ Dựng pages mỗi lần build. GẮN KEY theo locale cho SettingsPage để bắt rebuild khi đổi ngôn ngữ
+    final pages = <Widget>[
+      HistoryTab(key: _historyKey),
+      const TrangChuTab(),
+      SettingsPage(key: ValueKey('settings_${context.locale.languageCode}')),
+    ];
+
     return Stack(
       children: [
         const SoftGradientBackground(includeBaseLayer: true),
         Scaffold(
           backgroundColor: Colors.transparent,
-          body: IndexedStack(index: _index, children: _pages),
+          body: IndexedStack(index: _index, children: pages),
           bottomNavigationBar: EqualBottomBar(
             currentIndex: _index,
             onChanged: _onTabChanged,
-            items: const [
-              BarItem(label: 'Lịch sử',   icon: Icons.history_outlined,  selectedIcon: Icons.history_rounded),
-              BarItem(label: 'Trang chủ', icon: Icons.home_outlined,     selectedIcon: Icons.home_rounded),
-              BarItem(label: 'Cài đặt',   icon: Icons.settings_outlined, selectedIcon: Icons.settings_rounded),
+            items: [
+              BarItem(
+                label: 'nav.history'.tr(),
+                icon: Icons.history_outlined,
+                selectedIcon: Icons.history_rounded,
+              ),
+              BarItem(
+                label: 'nav.home'.tr(),
+                icon: Icons.home_outlined,
+                selectedIcon: Icons.home_rounded,
+              ),
+              BarItem(
+                label: 'nav.settings'.tr(),
+                icon: Icons.settings_outlined,
+                selectedIcon: Icons.settings_rounded,
+              ),
             ],
           ),
         ),
@@ -81,6 +93,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
+
 
 /// ----------------- TRANG CHỦ (Responsive) -----------------
 class TrangChuTab extends StatefulWidget {
@@ -116,7 +129,7 @@ class _TrangChuTabState extends State<TrangChuTab> {
 
     final q = _controller.text.trim();
     if (q.isEmpty) {
-      _showError('Vui lòng nhập nội dung câu hỏi');
+      _showError('home_tab.errors.empty'.tr());
       return;
     }
 
@@ -167,19 +180,33 @@ class _TrangChuTabState extends State<TrangChuTab> {
           FocusScope.of(context).unfocus();
           SystemChannels.textInput.invokeMethod('TextInput.hide');
         } else {
-          _showError('Gửi câu hỏi thất bại: ${data['message'] ?? 'Không nhận được task_id'}');
+          final msg = (data['message']?.toString() ?? 'common.unknown'.tr());
+          _showError('home_tab.errors.send_failed'.tr(namedArgs: {'message': msg}));
         }
       } else {
-        _showError('Máy chủ trả về mã lỗi ${resp.statusCode}');
+        _showError('home_tab.errors.server_error'
+            .tr(namedArgs: {'code': resp.statusCode.toString()}));
       }
     } catch (e) {
-      _showError('Không thể gửi câu hỏi: $e');
+      _showError('home_tab.errors.cannot_send'.tr(namedArgs: {'error': e.toString()}));
     } finally {
       if (mounted) setState(() => _loading = false);
     }
   }
 
+  void _fillFromSuggestion(String s) {
+    final t = s.replaceAll('\n', ' ').trim();
+    _controller.text = t;
+    _controller.selection = TextSelection.collapsed(offset: t.length);
+    _focusNode.requestFocus();
+  }
 
+  void _hideKeyboard() {
+    if (!mounted) return;
+    _focusNode.unfocus();
+    FocusScope.of(context).unfocus();
+    SystemChannels.textInput.invokeMethod('TextInput.hide');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -218,7 +245,7 @@ class _TrangChuTabState extends State<TrangChuTab> {
                     Row(),
                     const SizedBox(height: 24),
                     Text(
-                      'Giải bài tập AI',
+                      'home_tab.title'.tr(),
                       textAlign: TextAlign.center,
                       style: theme.textTheme.headlineSmall?.copyWith(
                         fontSize: titleSize,
@@ -227,7 +254,7 @@ class _TrangChuTabState extends State<TrangChuTab> {
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      'Nhập câu hỏi cho tất cả các môn học dưới dạng văn bản',
+                      'home_tab.subtitle'.tr(),
                       textAlign: TextAlign.center,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         fontSize: subSize,
@@ -244,22 +271,15 @@ class _TrangChuTabState extends State<TrangChuTab> {
                       runSpacing: 12,
                       children: [
                         _PillSuggestion(
-                          text: 'Tại sao Bức tường\nBerlin được xây dựng?',
-                          onTap: () {
-                            _controller.text = 'Tại sao Bức tường Berlin được xây dựng?';
-                            _focusNode.requestFocus();
-                          },
+                          text: 'home_tab.suggestions.berlin_wall'.tr(),
+                          onTap: () => _fillFromSuggestion('home_tab.suggestions.berlin_wall'.tr()),
                         ),
                         _PillSuggestion(
-                          text: 'Điệp âm là gì?',
-                          onTap: () {
-                            _controller.text = 'Điệp âm là gì?';
-                            _focusNode.requestFocus();
-                          },
+                          text: 'home_tab.suggestions.alliteration'.tr(),
+                          onTap: () => _fillFromSuggestion('home_tab.suggestions.alliteration'.tr()),
                         ),
                       ],
                     ),
-
                     const Spacer(),
                     // chừa khoảng trống để nội dung không bị đè bởi thanh hỏi nổi
                     SizedBox(height: (bottomBarH + sysBottom) + 72),
@@ -279,7 +299,7 @@ class _TrangChuTabState extends State<TrangChuTab> {
             controller: _controller,
             focusNode: _focusNode,
             loading: _loading,
-            hint: 'Gửi đề bài bạn muốn Học Bá AI giải',
+            hint: 'home_tab.input_hint'.tr(),
             onSend: _send,
           ),
         ),
@@ -288,15 +308,23 @@ class _TrangChuTabState extends State<TrangChuTab> {
         Positioned(
           right: hPad,
           bottom: sysBottom + 12,
-          child: _RectSideButton(
-            width: sideW,
-            height: askBarH,
-            icon: Icons.add_photo_alternate_outlined,
-            iconColor: Colors.black,
+          child: _CircleGradientButton(
+            tapSize: askBarH,   // vùng chạm = 54 (giữ như cũ)
+            circleSize: 45,     // 👈 vòng tròn nhỏ lại (34 hoặc 36 tuỳ bạn)
+            icon: Icons.camera_alt_rounded,
+            iconSize: 25,       // khớp với vòng tròn nhỏ
             onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const CropPage()),
-              );
+              final wasKeyboardOpen =
+                  MediaQuery.viewInsetsOf(context).bottom > 0 || _focusNode.hasFocus;
+
+              if (wasKeyboardOpen) _hideKeyboard();
+
+              Navigator.of(context)
+                  .push(MaterialPageRoute(builder: (_) => const CropPage()))
+                  .then((_) {
+                if (!mounted) return;
+                if (wasKeyboardOpen) _hideKeyboard();
+              });
             },
           ),
         ),
@@ -521,18 +549,30 @@ class EqualBottomBar extends StatelessWidget {
                 }
 
                 return Expanded(
-                  child: Center(
-                    child: InkResponse(
-                      onTap: () => onChanged(i),
-                      radius: circle,
-                      containedInkWell: false,
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: 6), // nhìn thoáng như ảnh
-                        child: icon,
+                  child: SizedBox(
+                    height: barHeight, // ⬅️ vùng chạm cao = chiều cao thanh bar
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () => onChanged(i),
+                        splashColor: Colors.transparent,
+                        highlightColor: Colors.transparent,
+                        hoverColor: Colors.transparent,
+                        focusColor: Colors.transparent,
+                        // phủ kín slot giúp tap dễ hơn, vẫn có ripple
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(24),
+                          topRight: Radius.circular(24),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 6),
+                          child: Center(child: icon), // icon vẫn như cũ
+                        ),
                       ),
                     ),
                   ),
                 );
+
               }),
             ),
           ),
@@ -657,6 +697,63 @@ class BarItem {
   final IconData icon;
   final IconData selectedIcon;
   const BarItem({required this.label, required this.icon, required this.selectedIcon});
+}
+
+class _CircleGradientButton extends StatelessWidget {
+  const _CircleGradientButton({
+    super.key,
+    required this.tapSize,    // kích thước vùng chạm (>=48 khuyến nghị)
+    required this.circleSize, // đường kính vòng tròn gradient
+    required this.icon,
+    required this.onTap,
+    this.iconSize = 22,
+  });
+
+  final double tapSize;
+  final double circleSize;
+  final IconData icon;
+  final double iconSize;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: tapSize,
+      height: tapSize,
+      child: Center(
+        child: Material(
+          color: Colors.transparent,
+          shape: const CircleBorder(),
+          child: Ink(
+            width: circleSize,
+            height: circleSize,
+            // ✅ Gradient y hệt nút gửi
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFF5539DA),
+                  Color(0xFFDE8F96),
+                  Color(0xFFEEC7BF),
+                ],
+              ),
+            ),
+            child: InkWell(
+              customBorder: const CircleBorder(),
+              onTap: onTap,
+              splashColor: Colors.white24,
+              highlightColor: Colors.white10,
+              child: Center(
+                child: Icon(icon, color: Colors.white, size: iconSize),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 

@@ -202,12 +202,6 @@ class _SolveResultPageState extends State<SolveResultPage> {
               icon: const Icon(Icons.arrow_back_ios_new_rounded),
               onPressed: () => Navigator.pop(context),
             ),
-            actions: const [
-              Padding(
-                padding: EdgeInsets.only(right: 8),
-                child: Icon(Icons.notifications_none_rounded),
-              ),
-            ],
           ),
           body: _buildBody(),
         ),
@@ -246,6 +240,7 @@ class _SolveResultPageState extends State<SolveResultPage> {
               borderRadius: BorderRadius.circular(12),
               child: MathHtmlPage(
                 markdown: methodMd,
+                maxHeight: MediaQuery.sizeOf(context).height * 0.9,
               ),
             ),
           ),
@@ -327,47 +322,6 @@ class _QuestionCard extends StatelessWidget {
   }
 }
 
-/// ====== Header tròn như ảnh ======
-class _HeaderBar extends StatelessWidget {
-  const _HeaderBar({required this.onBack});
-  final VoidCallback onBack;
-
-  @override
-  Widget build(BuildContext context) {
-    final muted = Colors.black.withOpacity(.60);
-    return Row(
-      children: [
-        _RoundIconButton(icon: Icons.arrow_back_ios_new_rounded, onTap: onBack),
-        const Spacer(),
-        _RoundIconButton(icon: Icons.notifications_none_rounded, onTap: () {}),
-      ],
-    );
-  }
-}
-
-class _RoundIconButton extends StatelessWidget {
-  const _RoundIconButton({required this.icon, required this.onTap});
-  final IconData icon;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.white.withOpacity(.75),
-      shape: const CircleBorder(),
-      elevation: 0,
-      child: InkWell(
-        customBorder: const CircleBorder(),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(10),
-          child: Icon(icon, size: 18, color: Colors.black), // <— dùng icon truyền vào
-        ),
-      ),
-    );
-  }
-}
-
 class _MethodCard extends StatelessWidget {
   const _MethodCard({
     required this.child,
@@ -422,6 +376,47 @@ class _MethodCard extends StatelessWidget {
       ),
     );
 
+  }
+}
+
+/// ====== Header tròn như ảnh ======
+class _HeaderBar extends StatelessWidget {
+  const _HeaderBar({required this.onBack});
+  final VoidCallback onBack;
+
+  @override
+  Widget build(BuildContext context) {
+    final muted = Colors.black.withOpacity(.60);
+    return Row(
+      children: [
+        _RoundIconButton(icon: Icons.arrow_back_ios_new_rounded, onTap: onBack),
+        const Spacer(),
+        _RoundIconButton(icon: Icons.notifications_none_rounded, onTap: () {}),
+      ],
+    );
+  }
+}
+
+class _RoundIconButton extends StatelessWidget {
+  const _RoundIconButton({required this.icon, required this.onTap});
+  final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.white.withOpacity(.75),
+      shape: const CircleBorder(),
+      elevation: 0,
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Icon(icon, size: 18, color: Colors.black), // <— dùng icon truyền vào
+        ),
+      ),
+    );
   }
 }
 

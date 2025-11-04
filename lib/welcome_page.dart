@@ -1,7 +1,11 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:solve_exercise/privacy_policy_page.dart';
+import 'package:solve_exercise/term_of_services.dart';
 import 'package:solve_exercise/utility.dart';
 import 'home_page.dart';
+import 'language_page.dart';
 import 'onboarding_page.dart';
 
 /// === ĐỔI ĐƯỜNG DẪN Ở ĐÂY CHO TIỆN ===
@@ -40,15 +44,15 @@ class OnboardingWelcomePage extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                       child: Image.asset(
                         _kLogoAssetPath!, // đảm bảo bạn set biến này trước khi build
-                        width: size.width * 0.35,
-                        height: size.width * 0.35,
+                        width: size.width * 0.3,
+                        height: size.width * 0.3,
                         fit: BoxFit.cover,
                         errorBuilder: (_, __, ___) => const SizedBox.shrink(), // không hiện ô xám
                       ),
                     ),
                   // --- Tiêu đề ---
                   Text(
-                    'Chào mừng đến với\nHọc Bá AI',
+                    'onboarding_welcome.title'.tr(),
                     textAlign: TextAlign.center,
                     style: theme.textTheme.headlineMedium?.copyWith(
                       fontSize: titleSize,
@@ -67,7 +71,7 @@ class OnboardingWelcomePage extends StatelessWidget {
                         width: heroMaxW,
                         height: heroMaxH,
                         alignment: Alignment.center,
-                        child: const Text('Thiếu ảnh minh hoạ', style: TextStyle(color: Colors.black45)),
+                        child: Text('onboarding_welcome.missing_hero'.tr(), style: TextStyle(color: Colors.black45)),
                       ),
                     ),
                   ),
@@ -80,27 +84,28 @@ class OnboardingWelcomePage extends StatelessWidget {
                     text: TextSpan(
                       style: theme.textTheme.bodySmall?.copyWith(color: Colors.black54, height: 1.3),
                       children: [
-                        const TextSpan(text: 'Tôi đồng ý với các '),
+                        TextSpan(text: 'onboarding_welcome.agree_prefix'.tr()),
                         TextSpan(
-                          text: 'Điều khoản',
+                          text: 'onboarding_welcome.terms'.tr(),
                           style: const TextStyle(decoration: TextDecoration.underline, fontWeight: FontWeight.w600),
                           recognizer: TapGestureRecognizer()
                             ..onTap = () {
-                              // mở trang điều khoản
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Điều khoản')),
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (_) => const TermsOfServicePage()),
                               );
                             },
                         ),
-                        const TextSpan(text: ' và '),
+                        TextSpan(text: 'onboarding_welcome.and'.tr()),
                         TextSpan(
-                          text: 'Chính sách',
+                          text: 'onboarding_welcome.privacy'.tr(),
                           style: const TextStyle(decoration: TextDecoration.underline, fontWeight: FontWeight.w600),
                           recognizer: TapGestureRecognizer()
                             ..onTap = () {
                               // mở trang chính sách
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Chính sách')),
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (_) => const PrivacyPolicyPage()),
                               );
                             },
                         ),
@@ -131,7 +136,7 @@ class OnboardingWelcomePage extends StatelessWidget {
                           ),
                           child: Center(
                             child: Text(
-                              'Đồng ý & tiếp tục',
+                              'onboarding_welcome.cta'.tr(),
                               style: theme.textTheme.titleMedium?.copyWith(
                                 color: Colors.white,
                                 fontWeight: FontWeight.w700,

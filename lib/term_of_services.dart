@@ -1,5 +1,6 @@
 // terms_of_service_page.dart
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart'; // ⬅️ i18n
 import 'package:solve_exercise/utility.dart'; // SoftGradientBackground
 
 class TermsOfServicePage extends StatelessWidget {
@@ -7,18 +8,49 @@ class TermsOfServicePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
+    final size  = MediaQuery.of(context).size;
     final theme = Theme.of(context);
 
     // responsive
-    final side = (size.width * 0.06).clamp(14, 22).toDouble();
-    final topGap = (size.height * 0.02).clamp(8, 16).toDouble();
+    final side      = (size.width * 0.06).clamp(14, 22).toDouble();
+    final topGap    = (size.height * 0.02).clamp(8, 16).toDouble();
     final titleSize = (size.width * 0.060).clamp(18, 22).toDouble();
-    final hSize = (size.width * 0.050).clamp(15, 18).toDouble();
-    final bodySize = (size.width * 0.040).clamp(13, 15).toDouble();
+    final hSize     = (size.width * 0.050).clamp(15, 18).toDouble();
+    final bodySize  = (size.width * 0.040).clamp(13, 15).toDouble();
 
     const purple = Color(0xFF2D2F79);
-    const text = Color(0xFF3A3F63);
+
+    // bullets (KHÔNG const để nhận cập nhật khi đổi ngôn ngữ)
+    final purposeBullets = <String>[
+      'terms.sections.purpose.b1'.tr(),
+      'terms.sections.purpose.b2'.tr(),
+      'terms.sections.purpose.b3'.tr(),
+    ];
+    final userBullets = <String>[
+      'terms.sections.user.b1'.tr(),
+      'terms.sections.user.b2'.tr(),
+      'terms.sections.user.b3'.tr(),
+    ];
+    final s1Bullets = <String>[
+      'terms.sections.students.s1.b1'.tr(),
+      'terms.sections.students.s1.b2'.tr(),
+      'terms.sections.students.s1.b3'.tr(),
+    ];
+    final s2Bullets = <String>[
+      'terms.sections.students.s2.b1'.tr(),
+      'terms.sections.students.s2.b2'.tr(),
+      'terms.sections.students.s2.b3'.tr(),
+    ];
+    final s3Bullets = <String>[
+      'terms.sections.students.s3.b1'.tr(),
+      'terms.sections.students.s3.b2'.tr(),
+      'terms.sections.students.s3.b3'.tr(),
+    ];
+    final s4Bullets = <String>[
+      'terms.sections.students.s4.b1'.tr(),
+      'terms.sections.students.s4.b2'.tr(),
+      'terms.sections.students.s4.b3'.tr(),
+    ];
 
     return Scaffold(
       body: Stack(
@@ -41,7 +73,7 @@ class TermsOfServicePage extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        'Điều khoản dịch vụ',
+                        'terms.title'.tr(), // ⬅️ i18n
                         textAlign: TextAlign.center,
                         style: theme.textTheme.titleLarge?.copyWith(
                           fontSize: titleSize,
@@ -60,158 +92,60 @@ class TermsOfServicePage extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _Body(
-                          'Chào mừng bạn đến với ứng dụng Học Bá AI. Khi truy cập hoặc sử dụng Ứng dụng, '
-                          'bạn đồng ý tuân thủ và bị ràng buộc bởi các Điều khoản Dịch vụ này.',
-                          bodySize: bodySize,
-                        ),
+                        _Body('terms.intro'.tr(), bodySize: bodySize),
 
                         const SizedBox(height: 14),
-                        _SectionTitle('Mục đích sử dụng', size: hSize),
-                        _Body(
-                          'Ứng dụng cung cấp các tính năng hỗ trợ học tập bằng trí tuệ nhân tạo (AI), bao gồm nhưng không giới hạn ở:',
-                          bodySize: bodySize,
-                        ),
+                        _SectionTitle('terms.sections.purpose.title'.tr(), size: hSize),
+                        _Body('terms.sections.purpose.intro'.tr(), bodySize: bodySize),
                         const SizedBox(height: 6),
-                        _Bullets(
-                          items: const [
-                            'Gợi ý hướng giải và gợi ý cách giải bài tập;',
-                            'Cung cấp đáp án tham khảo;',
-                            'Hỗ trợ người học rèn luyện và nâng cao kiến thức.',
-                          ],
-                          bodySize: bodySize,
-                        ),
+                        _Bullets(items: purposeBullets, bodySize: bodySize),
                         const SizedBox(height: 6),
-                        _Body(
-                          'Ứng dụng KHÔNG nhằm mục đích thay thế cho quá trình học tập, làm bài; '
-                          'không phục vụ gian lận học thuật.',
-                          bodySize: bodySize,
-                          strong: true,
-                        ),
+                        _Body('terms.sections.not_replace_learning'.tr(), bodySize: bodySize, strong: true),
 
                         const SizedBox(height: 14),
-                        _SectionTitle('Trách nhiệm người dùng', size: hSize),
-                        _Bullets(
-                          items: const [
-                            'Không sử dụng Ứng dụng để gian lận trong thi cử, làm bài kiểm tra hoặc vi phạm quy định học đường;',
-                            'Không khai thác, phát tán hoặc sử dụng nội dung do AI tạo ra vào các mục đích trái pháp luật hoặc gian lận học thuật;',
-                            'Chịu hoàn toàn trách nhiệm về mọi hậu quả phát sinh từ việc sử dụng Ứng dụng.',
-                          ],
-                          bodySize: bodySize,
-                        ),
+                        _SectionTitle('terms.sections.user.title'.tr(), size: hSize),
+                        _Bullets(items: userBullets, bodySize: bodySize),
 
                         const SizedBox(height: 14),
-                        _SectionTitle(
-                          'Điều khoản dành riêng cho học sinh',
-                          size: hSize,
-                        ),
+                        _SectionTitle('terms.sections.students.title'.tr(), size: hSize),
 
                         const SizedBox(height: 10),
-                        _SubTitle('1. Mục đích giáo dục', size: hSize - 2),
-                        _Body(
-                          'Ứng dụng được thiết kế nhằm hỗ trợ học sinh hiểu và làm chủ kiến thức, '
-                          'không phải để thay thế quá trình học tập.',
-                          bodySize: bodySize,
-                        ),
+                        _SubTitle('terms.sections.students.s1.title'.tr(), size: hSize - 2),
+                        _Body('terms.sections.students.s1.body'.tr(), bodySize: bodySize),
                         const SizedBox(height: 6),
-                        _Bullets(
-                          items: const [
-                            'Tham khảo phương pháp giải;',
-                            'Củng cố từng bước giải / kiến thức;',
-                            'Nâng cao năng lực học tự duy và tự phân biện.',
-                          ],
-                          bodySize: bodySize,
-                        ),
+                        _Bullets(items: s1Bullets, bodySize: bodySize),
 
                         const SizedBox(height: 10),
-                        _SubTitle(
-                          '2. Cam kết đạo đức học tập',
-                          size: hSize - 2,
-                        ),
-                        _Bullets(
-                          items: const [
-                            'Không dùng ứng dụng để nộp bài giải AI tạo ra như sản phẩm của mình;',
-                            'Không vận dụng kết quả để lách các điều chỉnh chính sách kiểm tra/đánh giá;',
-                            'Nỗ lực rèn luyện đạo đức học tập, chịu trách nhiệm với các nội dung đã nộp.',
-                          ],
-                          bodySize: bodySize,
-                        ),
+                        _SubTitle('terms.sections.students.s2.title'.tr(), size: hSize - 2),
+                        _Bullets(items: s2Bullets, bodySize: bodySize),
 
                         const SizedBox(height: 10),
-                        _SubTitle(
-                          '3. Kiểm soát và xử lý vi phạm',
-                          size: hSize - 2,
-                        ),
-                        _Body(
-                          'Nhà trường hoặc tổ chức giáo dục có thể áp dụng các biện pháp kiểm tra, phát hiện hành vi gian lận liên quan đến việc sử dụng AI. Nếu phát hiện người dùng vi phạm, chúng tôi có quyền:',
-                          bodySize: bodySize,
-                        ),
-                        _Bullets(
-                          items: const [
-                            'Cảnh báo, tạm khóa hoặc chấm dứt tài khoản;',
-                            'Cung cấp thông tin cần thiết cho cơ quan/đơn vị giáo dục liên quan khi có yêu cầu hợp pháp.',
-                            'Nỗ lực rèn luyện đạo đức học tập, chịu trách nhiệm với các nội dung đã nộp.',
-                          ],
-                          bodySize: bodySize,
-                        ),
-                        _Body(
-                          'Người dùng vi phạm chịu hoàn toàn trách nhiệm trước quy định của nhà trường (nếu có).',
-                          bodySize: bodySize,
-                        ),
+                        _SubTitle('terms.sections.students.s3.title'.tr(), size: hSize - 2),
+                        _Body('terms.sections.students.s3.body'.tr(), bodySize: bodySize),
+                        _Bullets(items: s3Bullets, bodySize: bodySize),
+                        _Body('terms.sections.students.s3.tail'.tr(), bodySize: bodySize),
 
                         const SizedBox(height: 10),
-                        _SubTitle(
-                          '4. Khuyến khích sử dụng có trách nhiệm',
-                          size: hSize - 2,
-                        ),
-                        _Body(
-                          'Chúng tôi khuyến khích học sinh:',
-                          bodySize: bodySize,
-                        ),
-                        _Bullets(
-                          items: const [
-                            'Sử dụng AI như một trợ giảng cá nhân, không phải người làm bài hộ;',
-                            'Tự kiểm chứng mọi kết quả do AI cung cấp;',
-                            'Chủ động học hỏi, đặt câu hỏi, thảo luận thay vì phụ thuộc vào máy.',
-                          ],
-                          bodySize: bodySize,
-                        ),
+                        _SubTitle('terms.sections.students.s4.title'.tr(), size: hSize - 2),
+                        _Body('terms.sections.students.s4.body'.tr(), bodySize: bodySize),
+                        _Bullets(items: s4Bullets, bodySize: bodySize),
 
                         const SizedBox(height: 14),
-                        _SectionTitle('Miễn trừ trách nhiệm', size: hSize),
+                        _SectionTitle('terms.sections.disclaimer.title'.tr(), size: hSize),
                         const SizedBox(height: 10),
-                        _Body(
-                          'Chào mừng bạn đến với ứng dụng Học Bá AI. Khi truy cập hoặc sử dụng Ứng dụng, ',
-                          bodySize: bodySize,
-                        ),
+                        _Body('terms.sections.disclaimer.p1'.tr(), bodySize: bodySize),
                         const SizedBox(height: 10),
-                        _Body(
-                              'Việc sử dụng AI cần được thực hiện một cách có trách nhiệm, trung thực và minh bạch. Chúng tôi KHÔNG chịu trách nhiệm đối với bất kỳ thiệt hại nào phát sinh từ việc người dùng lạm dụng AI để gian lận học tập, vi phạm quy chế thi cử hoặc quy định của học đường.',
-                          bodySize: bodySize,
-                        ),
-                        const SizedBox(height: 10),
-                        _Body(
-                              'Kết quả do AI cung cấp chỉ mang tính chất tham khảo. Người dùng cần kiểm chứng và chịu trách nhiệm về quyết định sử dụng.',
-                          bodySize: bodySize,
-                        ),
+                        _Body('terms.sections.disclaimer.p2'.tr(), bodySize: bodySize),
 
                         const SizedBox(height: 14),
-                        _SectionTitle('Quyền sở hữu trí tuệ', size: hSize),
-
+                        _SectionTitle('terms.sections.ip.title'.tr(), size: hSize),
                         const SizedBox(height: 10),
-                        _Body(
-                          'Mọi nội dung, thiết kế, nhãn hiệu, mã nguồn và công nghệ liên quan đến Ứng dụng thuộc quyền sở hữu của Công ty TNHH ONEADX.',
-                          bodySize: bodySize,
-                        ),
+                        _Body('terms.sections.ip.body'.tr(), bodySize: bodySize),
 
                         const SizedBox(height: 14),
-                        _SectionTitle('Thay đổi điều khoản', size: hSize),
-
+                        _SectionTitle('terms.sections.changes.title'.tr(), size: hSize),
                         const SizedBox(height: 10),
-                        _Body(
-                          'Chúng tôi có quyền cập nhật hoặc sửa đổi các Điều khoản này bất kỳ lúc nào. Mọi thay đổi sẽ có hiệu lực kể từ khi được đăng tải trên Ứng dụng.',
-                          bodySize: bodySize,
-                        ),
+                        _Body('terms.sections.changes.body'.tr(), bodySize: bodySize),
                       ],
                     ),
                   ),
@@ -229,7 +163,6 @@ class TermsOfServicePage extends StatelessWidget {
 
 class _CircleBackButton extends StatelessWidget {
   const _CircleBackButton({required this.onTap});
-
   final VoidCallback onTap;
 
   @override
@@ -253,7 +186,6 @@ class _CircleBackButton extends StatelessWidget {
 
 class _SectionTitle extends StatelessWidget {
   const _SectionTitle(this.text, {required this.size});
-
   final String text;
   final double size;
 
@@ -272,7 +204,6 @@ class _SectionTitle extends StatelessWidget {
 
 class _SubTitle extends StatelessWidget {
   const _SubTitle(this.text, {required this.size});
-
   final String text;
   final double size;
 
@@ -291,7 +222,6 @@ class _SubTitle extends StatelessWidget {
 
 class _Body extends StatelessWidget {
   const _Body(this.text, {required this.bodySize, this.strong = false});
-
   final String text;
   final double bodySize;
   final bool strong;
@@ -312,7 +242,6 @@ class _Body extends StatelessWidget {
 
 class _Bullets extends StatelessWidget {
   const _Bullets({required this.items, required this.bodySize});
-
   final List<String> items;
   final double bodySize;
 
@@ -325,26 +254,22 @@ class _Bullets extends StatelessWidget {
     );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: items
-          .map(
+      children: items.map(
             (t) => Padding(
-              padding: const EdgeInsets.only(bottom: 6),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    '•  ',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF2D2F79),
-                    ),
-                  ),
-                  Expanded(child: Text(t, style: style)),
-                ],
-              ),
-            ),
-          )
-          .toList(),
+          padding: const EdgeInsets.only(bottom: 6),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('•  ',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF2D2F79),
+                  )),
+              Expanded(child: Text(t, style: style)),
+            ],
+          ),
+        ),
+      ).toList(),
     );
   }
 }
