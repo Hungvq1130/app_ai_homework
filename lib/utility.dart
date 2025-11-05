@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
@@ -267,5 +268,15 @@ class OnboardingGradientCard extends StatelessWidget {
         child: child,
       ),
     );
+  }
+}
+
+String apiLanguageOf(BuildContext context) {
+  try {
+    final code = context.locale.languageCode.toLowerCase();
+    return code == 'vi' ? 'Vietnamese' : 'English';
+  } catch (_) {
+    final sys = WidgetsBinding.instance.platformDispatcher.locale.languageCode.toLowerCase();
+    return sys == 'vi' ? 'Vietnamese' : 'English';
   }
 }

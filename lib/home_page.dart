@@ -333,43 +333,6 @@ class _TrangChuTabState extends State<TrangChuTab> {
   }
 }
 
-class _PillSuggestion extends StatelessWidget {
-  final String text;
-  final VoidCallback onTap;
-  const _PillSuggestion({required this.text, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final radius = BorderRadius.circular(14);
-
-    return GradientBorder(
-      borderRadius: radius,
-      strokeWidth: 2.0,
-      child: Material(
-        color: theme.colorScheme.surface,
-        shape: RoundedRectangleBorder(borderRadius: radius),
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: radius,
-          child: Container(
-            constraints: const BoxConstraints(minHeight: 52),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-            alignment: Alignment.center,
-            child: Text(
-              text,
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w400,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _BottomAskBarInput extends StatelessWidget {
   final TextEditingController controller;
   final FocusNode focusNode;
@@ -574,6 +537,43 @@ class EqualBottomBar extends StatelessWidget {
                 );
 
               }),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PillSuggestion extends StatelessWidget {
+  final String text;
+  final VoidCallback onTap;
+  const _PillSuggestion({required this.text, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final radius = BorderRadius.circular(14);
+
+    return GradientBorder(
+      borderRadius: radius,
+      strokeWidth: 2.0,
+      child: Material(
+        color: theme.colorScheme.surface,
+        shape: RoundedRectangleBorder(borderRadius: radius),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: radius,
+          child: Container(
+            constraints: const BoxConstraints(minHeight: 52),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            alignment: Alignment.center,
+            child: Text(
+              text,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w400,
+              ),
             ),
           ),
         ),

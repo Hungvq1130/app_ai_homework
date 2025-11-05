@@ -8,17 +8,23 @@ const String kMathHtml = r'''<!doctype html>
 
   <!-- MathJax -->
   <script>
-    window.MathJax = {
-      tex: {
-        inlineMath: [['$', '$'], ['\\(', '\\)']],
-        displayMath: [['$$', '$$'], ['\\[', '\\]']],
-        processEscapes: true,
-        tags: 'ams'
-      },
-      options: { renderActions: { addMenu: [] } }
-    };
-  </script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  window.MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      displayMath: [['$$', '$$'], ['\\[', '\\]']],
+      processEscapes: true,
+      tags: 'ams'
+    },
+    options: { enableMenu: false },
+    chtml: {
+      displayOverflow: 'linebreak',      // tự ngắt dòng với khối display
+      linebreaks: { inline: true, width: '100%' }, // cho phép inline ngắt dòng
+      scale: 1,
+      minScale: 0.85
+    }
+  };
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
 
   <!-- Markdown -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -75,8 +81,12 @@ const String kMathHtml = r'''<!doctype html>
     }
 
     /* ---------- MathJax + kéo ngang cho công thức dài ---------- */
-    mjx-container{ max-width:none; overflow:visible; display:inline-block; word-break:normal; }
-    mjx-container[display="true"]{ margin:.6rem 0; display:inline-block; }
+    mjx-container{ max-width:none; overflow:visible; display:inline; word-break:normal; }
+mjx-container[display="true"]{
+display:block;
+width:100%;
+margin:.6rem 0;
+}
     .math-scroll{ width:100%; overflow-x:auto; overflow-y:hidden; -webkit-overflow-scrolling:touch; padding-bottom:2px; }
     .math-scroll > mjx-container{ display:inline-block; }
 
@@ -270,17 +280,21 @@ const String kMathHtml = r'''<!doctype html>
   }
 
   // ---------- Kéo ngang cho công thức display ----------
-  function wrapDisplayMathForScroll(root){
-    root.querySelectorAll('mjx-container[display="true"]').forEach(mjx=>{
-      const p = mjx.parentElement;
-      if(!p) return;
-      if(p.classList && p.classList.contains('math-scroll')) return;
-      const w = document.createElement('div');
-      w.className = 'math-scroll';
-      p.insertBefore(w, mjx);
-      w.appendChild(mjx);
-    });
-  }
+  function fallbackScrollIfOverflow(root){
+const EPS = 2;
+root.querySelectorAll('mjx-container[display="true"]').forEach(mjx=>{
+const parent = mjx.parentElement;
+if (!parent) return;
+const parentW = parent.clientWidth || 0;
+const needScroll = parentW && (mjx.scrollWidth > parentW + EPS);
+if (needScroll && !parent.classList.contains('math-scroll')) {
+const w = document.createElement('div');
+w.className = 'math-scroll';
+parent.insertBefore(w, mjx);
+w.appendChild(mjx);
+}
+});
+}
 
   // ---------- Fit logic (giữ inline/bảng, KHÔNG thu nhỏ khối) ----------
   function fitMathAndTables(root) {
@@ -322,31 +336,30 @@ const String kMathHtml = r'''<!doctype html>
   function debounce(fn, wait) { let t; return function(){ clearTimeout(t); t = setTimeout(() => fn(), wait); } }
 
   function renderMarkdown(md){
-    const out = document.getElementById('output');
-    const pre = preprocessMarkdown(md || '');
+  const out = document.getElementById('output');
+  const pre = preprocessMarkdown(md || '');
 
-    const t = tokenizeMath(pre);
-    let html = marked.parse(t.md);
-    html = detokenizeMath(html, t.tokens);
+  const t = tokenizeMath(pre);
+  let html = marked.parse(t.md);
+  html = detokenizeMath(html, t.tokens);
 
-    out.innerHTML = html;
+  out.innerHTML = html;
 
-    // Chia khu vực + bảng
-    structureSections(out);
-    wrapTables(out);
+  // Chia khu vực + bảng
+  structureSections(out);
+  wrapTables(out);
 
-    if (window.MathJax && MathJax.typesetPromise){
-      MathJax.typesetPromise().then(() => {
-        wrapDisplayMathForScroll(out);
-        requestAnimationFrame(() => { fitMathAndTables(out); });
-      });
-    } else {
-      wrapDisplayMathForScroll(out);
+  if (window.MathJax && MathJax.typesetPromise){
+    MathJax.typesetPromise([out]).then(() => {
+      fallbackScrollIfOverflow(out);
       requestAnimationFrame(() => { fitMathAndTables(out); });
-    }
+    });
+  } else {
+    requestAnimationFrame(() => { fitMathAndTables(out); });
   }
+}
+window.renderMarkdown = renderMarkdown;
 
-  window.renderMarkdown = renderMarkdown;
 
   // Refit khi đổi kích thước / xoay màn
   const refit = debounce(() => {

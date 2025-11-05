@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:solve_exercise/solve_result_page.dart';
+import 'package:solve_exercise/utility.dart';
 
 /// TODO: Đưa các hằng số này ra env/secure storage khi lên prod
 const String _apiUrl = 'https://ai-gateway.oneadx.com/v1/chat/';
@@ -35,9 +36,9 @@ class _AskPageState extends State<AskPage> {
 
     try {
       final body = {
-        "language": "Vietnamese",
-        "content": q,                 // đề bài người dùng nhập
-        "subject": "math",            // có thể thay bằng dropdown nếu bạn muốn
+        "language": apiLanguageOf(context),   // 👈 lấy theo app
+        "content": q,
+        "subject": "math",
         "time": DateTime.now().millisecondsSinceEpoch,
         "api_key": _apiKey,
       };

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:solve_exercise/solve_result_page.dart';
+import 'package:solve_exercise/utility.dart';
 import 'home_page.dart';
 
 class CropPage extends StatefulWidget {
@@ -69,11 +70,12 @@ class _CropPageState extends State<CropPage> {
 
     final payload = {
       "image_url": dataUrl,
-      "language": "Vietnamese",
+      "language": apiLanguageOf(context),   // 👈 lấy theo app
       "subject": "math",
       "time": DateTime.now().millisecondsSinceEpoch,
       "api_key": "tyff8tkw1t0rfz0bcs8yo3gzrt9wajkd",
     };
+
 
     try {
       final resp = await http.post(

@@ -1,12 +1,11 @@
 // lib/history_page.dart
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';        // ⬅️ THÊM
-import 'package:intl/intl.dart';                                  // ⬅️ THÊM
+import 'package:easy_localization/easy_localization.dart';
+import 'package:intl/intl.dart';
 import 'package:solve_exercise/utility.dart';
 import 'history_detail_page.dart';
 import 'history_store.dart';
-import 'math_html_page.dart';
 import '../main.dart' show routeObserver;
 
 class HistoryTab extends StatefulWidget {
@@ -16,12 +15,32 @@ class HistoryTab extends StatefulWidget {
 }
 
 class HistoryTabState extends State<HistoryTab> with RouteAware {
+  final List<SolvedItem> _items = <SolvedItem>[];
+  bool _loading = true;
+
   void refresh() {
     if (mounted) setState(() {});
   }
 
+  Future<void> _load() async {
+    final items = await HistoryStore.getAll();
+    if (!mounted) return;
+    setState(() {
+      _items
+        ..clear()
+        ..addAll(items);
+      _loading = false;
+    });
+  }
+
   Future<void> _pullToRefresh() async {
-    refresh();
+    await _load();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
   }
 
   @override
@@ -41,7 +60,8 @@ class HistoryTabState extends State<HistoryTab> with RouteAware {
 
   @override
   void didPopNext() {
-    refresh();
+    // khi quay về từ trang chi tiết, cập nhật lại nếu có thay đổi
+    _load();
   }
 
   String _plainPreview(String md, {int maxLen = 120}) {
@@ -62,16 +82,18 @@ class HistoryTabState extends State<HistoryTab> with RouteAware {
     final path = it.imagePath;
     if (path != null && path.isNotEmpty && File(path).existsSync()) {
       return SizedBox(
-        width: kThumb, height: kThumb,
+        width: kThumb,
+        height: kThumb,
         child: ClipRRect(
           borderRadius: kBR,
           child: Image.file(File(path), fit: BoxFit.cover),
         ),
       );
     }
-    return SizedBox(
-      width: kThumb, height: kThumb,
-      child: const DecoratedBox(
+    return const SizedBox(
+      width: kThumb,
+      height: kThumb,
+      child: DecoratedBox(
         decoration: BoxDecoration(
           color: Color(0xFFEFF4FF),
           borderRadius: kBR,
@@ -96,7 +118,7 @@ class HistoryTabState extends State<HistoryTab> with RouteAware {
         padding: EdgeInsets.only(bottom: _bottomOverlapPadding(context)),
         children: [
           const SizedBox(height: 160),
-          Center(child: Text('history.empty'.tr())),                // ⬅️ i18n
+          Center(child: Text('history.empty'.tr())),
           const SizedBox(height: 160),
         ],
       ),
@@ -111,35 +133,39 @@ class HistoryTabState extends State<HistoryTab> with RouteAware {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: Text('history.page_title'.tr()),                    // ⬅️ i18n
+        title: Text('history.page_title'.tr()),
         backgroundColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
         actions: [
           IconButton(
-            tooltip: 'history.clear_all'.tr(),                     // ⬅️ i18n
+            tooltip: 'history.clear_all'.tr(),
             icon: const Icon(Icons.delete_sweep_outlined),
             onPressed: () async {
+              if (_items.isEmpty) return;
               final ok = await showDialog<bool>(
                 context: context,
                 builder: (ctx) => AlertDialog(
-                  title: Text('history.dialog.title'.tr()),        // ⬅️ i18n
-                  content: Text('history.dialog.content'.tr()),    // ⬅️ i18n
+                  title: Text('history.dialog.title'.tr()),
+                  content: Text('history.dialog.content'.tr()),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(ctx, false),
-                      child: Text('history.dialog.cancel'.tr()),   // ⬅️ i18n
+                      child: Text('history.dialog.cancel'.tr()),
                     ),
                     FilledButton(
                       onPressed: () => Navigator.pop(ctx, true),
-                      child: Text('history.dialog.delete'.tr()),   // ⬅️ i18n
+                      child: Text('history.dialog.delete'.tr()),
                     ),
                   ],
                 ),
               );
               if (ok == true) {
                 await HistoryStore.clear();
-                refresh();
+                if (!mounted) return;
+                setState(() {
+                  _items.clear(); // cập nhật UI ngay, không reload FutureBuilder
+                });
               }
             },
           ),
@@ -150,69 +176,50 @@ class HistoryTabState extends State<HistoryTab> with RouteAware {
           const SoftGradientBackground(),
           Padding(
             padding: EdgeInsets.only(top: topPad),
-            child: FutureBuilder<List<SolvedItem>>(
-              future: HistoryStore.getAll(),
-              builder: (context, snap) {
-                if (snap.connectionState != ConnectionState.done) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                final items = snap.data ?? const <SolvedItem>[];
-                if (items.isEmpty) return _emptyRefreshable(context);
+            child: _loading
+                ? const Center(child: CircularProgressIndicator())
+                : (_items.isEmpty
+                ? _emptyRefreshable(context)
+                : RefreshIndicator(
+              onRefresh: _pullToRefresh,
+              child: ListView.separated(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: EdgeInsets.fromLTRB(12, 12, 12, bottomPad),
+                itemCount: _items.length,
+                separatorBuilder: (_, __) =>
+                const SizedBox(height: 8),
+                itemBuilder: (context, i) {
+                  final it = _items[i];
 
-                return RefreshIndicator(
-                  onRefresh: _pullToRefresh,
-                  child: ListView.separated(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    padding: EdgeInsets.fromLTRB(12, 12, 12, bottomPad),
-                    itemCount: items.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 8),
-                    itemBuilder: (context, i) {
-                      final it = items[i];
+                  final timeStr = DateFormat
+                      .yMd(context.locale.toString())
+                      .add_Hm()
+                      .format(it.createdAt.toLocal());
+                  final fallback = 'history.item.solved_at'
+                      .tr(namedArgs: {'time': timeStr});
 
-                      // ⬇️ tiêu đề fallback theo locale
-                      final timeStr = DateFormat.yMd(context.locale.toString())
-                          .add_Hm()
-                          .format(it.createdAt.toLocal());
-                      final fallback = 'history.item.solved_at'
-                          .tr(namedArgs: {'time': timeStr});
+                  final title = (it.originalQuestion?.trim().isNotEmpty == true)
+                      ? it.originalQuestion!.trim()
+                      : fallback;
 
-                      final title = (it.originalQuestion?.trim().isNotEmpty == true)
-                          ? it.originalQuestion!.trim()
-                          : fallback;
+                  final preview = _plainPreview(it.markdown);
 
-                      final preview = _plainPreview(it.markdown);
-
-                      return Dismissible(
-                        key: ValueKey(it.id),
-                        background: Container(
-                          alignment: Alignment.centerLeft,
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          color: Colors.red.shade400,
-                          child: const Icon(Icons.delete, color: Colors.white),
-                        ),
-                        direction: DismissDirection.startToEnd,
-                        onDismissed: (_) async {
-                          await HistoryStore.remove(it.id);
-                          refresh();
-                        },
-                        child: _HistoryItemCard(
-                          leading: _leadingThumb(it),
-                          title: title,
-                          subtitle: preview,
-                          onTap: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => HistoryDetailPage(item: it),
-                              ),
-                            );
-                          },
+                  // Không vuốt xóa, không icon xóa từng item
+                  return _HistoryItemCard(
+                    leading: _leadingThumb(it),
+                    title: title,
+                    subtitle: preview,
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => HistoryDetailPage(item: it),
                         ),
                       );
                     },
-                  ),
-                );
-              },
-            ),
+                  );
+                },
+              ),
+            )),
           ),
         ],
       ),
@@ -243,7 +250,11 @@ class _HistoryItemCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: const Color(0xFFE8E8EE)),
         boxShadow: const [
-          BoxShadow(blurRadius: 10, offset: Offset(0, 3), color: Color(0x12000000)),
+          BoxShadow(
+            blurRadius: 10,
+            offset: Offset(0, 3),
+            color: Color(0x12000000),
+          ),
         ],
       ),
       child: Material(
@@ -270,7 +281,8 @@ class _HistoryItemCard extends StatelessWidget {
                           title,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w500),
+                          style: theme.textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.w500),
                         ),
                         const SizedBox(height: 4),
                         Text(
@@ -284,6 +296,7 @@ class _HistoryItemCard extends StatelessWidget {
                       ],
                     ),
                   ),
+                  // Không còn nút xoá từng item
                 ],
               ),
             ),

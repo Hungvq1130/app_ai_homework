@@ -9,7 +9,8 @@
     "back": "Quay lại",
     "apply": "Áp dụng",
     "continue": "Tiếp tục",
-    "unknown": "Không rõ"
+    "unknown": "Không rõ",
+    "retry": "Thử lại"
   },
   "home": {
     "title": "Trang chủ"
@@ -225,5 +226,28 @@
   "splash": {
     "brand": "Học Bá AI",
     "tagline": "Bạn học, AI trợ giúp!"
+  },
+  "solve_result": {
+    "title": "Xem lời giải",
+    "md": {
+      "question_heading": "## Câu hỏi"
+    },
+    "empty": "Chưa có nội dung.",
+    "question_card_title": "Câu hỏi",
+    "loading_question": "— Đang lấy nội dung đề bài…",
+    "processing": {
+      "pending": "Đang chờ xử lý...",
+      "assigned": "Học Bá AI đang phân tích..."
+    },
+    "error_title": "Không tìm thấy lời giải nào phù hợp",
+    "http_error": "Hãy thử lại!",
+    "network_error": "Lỗi mạng: {error}",
+    "timeout": "Không tìm thấy lời giải nào phù hợp. Vui lòng thử lại.",
+    "no_data_to_resubmit": "Không có dữ liệu để gửi lại.",
+    "resubmit_failed": "Gửi lại thất bại.",
+    "image": {
+      "load_failed": "Không tải được ảnh",
+      "decode_failed": "Không đọc được ảnh"
+    }
   }
 }

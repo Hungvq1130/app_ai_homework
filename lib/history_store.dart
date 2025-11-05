@@ -2,13 +2,12 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
 class SolvedItem {
   final String id;
   final String? originalQuestion;
-  final String? imagePath; // file:///... hoặc path nội bộ; cũng có thể là http(s)
+  final String? imagePath; // path nội bộ hoặc http(s)
   final String markdown;
   final DateTime createdAt;
 
@@ -33,79 +32,128 @@ class SolvedItem {
     originalQuestion: j['originalQuestion'] as String?,
     imagePath: j['imagePath'] as String?,
     markdown: j['markdown'] as String? ?? '',
-    createdAt: DateTime.tryParse(j['createdAt'] as String? ?? '') ?? DateTime.now(),
+    createdAt:
+    DateTime.tryParse(j['createdAt'] as String? ?? '') ?? DateTime.now(),
   );
 }
 
+/// Lưu TRONG PHIÊN (memory) + file TẠM. Mỗi lần app khởi động sẽ xoá sạch.
 class HistoryStore {
-  static const _prefsKey = 'solve_history_v1';
+  HistoryStore._();
   static final _uuid = const Uuid();
 
-  /// Lưu ảnh nếu là data URL -> trả về đường dẫn file; nếu không thì trả về nguyên string (http/https/path)
+  /// Danh sách chỉ tồn tại trong RAM suốt vòng đời process.
+  static final List<SolvedItem> _items = <SolvedItem>[];
+
+  /// Thư mục tạm cho phiên hiện tại: <tmp>/solves_session
+  static Directory? _sessionDir;
+
+  /// Gọi ở `main()` trước `runApp()` để dọn rác phiên cũ và tạo phiên mới.
+  static Future<void> initSession() async {
+    final tmp = await getTemporaryDirectory();
+    _sessionDir = Directory('${tmp.path}/solves_session');
+
+    // Xoá mọi thứ của phiên trước (nếu có) -> đảm bảo "thoát app là giải phóng"
+    if (await _sessionDir!.exists()) {
+      try {
+        await _sessionDir!.delete(recursive: true);
+      } catch (_) {}
+    }
+    await _sessionDir!.create(recursive: true);
+
+    // Dọn RAM (phòng trường hợp hot-restart)
+    _items.clear();
+  }
+
+  static Directory _ensureSessionDirSync() {
+    final dir = _sessionDir;
+    if (dir == null) {
+      throw StateError(
+          'HistoryStore.initSession() chưa được gọi. Hãy gọi trong main() trước runApp().');
+    }
+    return dir;
+  }
+
+  /// Lưu ảnh nếu là data URL -> ghi file vào thư mục tạm của phiên, trả về path.
+  /// Nếu không phải data URL thì trả nguyên string (http/https/path).
   static Future<String?> persistImageIfNeeded(String? maybeDataUrl) async {
     if (maybeDataUrl == null || maybeDataUrl.isEmpty) return null;
 
-    final m = RegExp(r'^data:image/(\w+);base64,(.*)$', dotAll: true).firstMatch(maybeDataUrl);
+    final m = RegExp(r'^data:image/(\w+);base64,(.*)$', dotAll: true)
+        .firstMatch(maybeDataUrl);
     if (m == null) {
-      // Không phải data URL -> giữ nguyên (chấp nhận http/https hoặc path sẵn có)
+      // Không phải data URL -> giữ nguyên
       return maybeDataUrl;
     }
-    final ext = m.group(1) ?? 'png';
+    final ext = (m.group(1) ?? 'png').toLowerCase();
     final b64 = m.group(2) ?? '';
     final bytes = base64Decode(b64);
 
-    final dir = await getApplicationDocumentsDirectory();
-    final solvesDir = Directory('${dir.path}/solves');
-    if (!await solvesDir.exists()) {
-      await solvesDir.create(recursive: true);
-    }
-    final path = '${solvesDir.path}/${_uuid.v4()}.$ext';
+    final dir = _ensureSessionDirSync();
+    final path = '${dir.path}/${_uuid.v4()}.$ext';
     final f = File(path);
     await f.writeAsBytes(bytes, flush: true);
-    return path; // lưu path nội bộ
+    return path;
   }
 
+  /// Trả về bản sao đã sort (mới nhất trước).
   static Future<List<SolvedItem>> getAll() async {
-    final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getStringList(_prefsKey) ?? const [];
-    final items = <SolvedItem>[];
-    for (final s in raw) {
-      try {
-        items.add(SolvedItem.fromJson(jsonDecode(s) as Map<String, dynamic>));
-      } catch (_) {}
-    }
-    items.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-    return items;
+    final out = List<SolvedItem>.from(_items);
+    out.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    return out;
   }
 
-  static Future<void> add(SolvedItem item, {int maxItems = 200}) async {
-    final prefs = await SharedPreferences.getInstance();
-    final list = prefs.getStringList(_prefsKey) ?? <String>[];
-    // chặn trùng đơn giản theo hash nội dung
-    final sig = jsonEncode(item.toJson());
-    if (list.isNotEmpty && list.first == sig) return;
+  /// Thêm vào đầu danh sách (RAM). Không ghi SharedPreferences.
+  /// Ứng với yêu cầu "chỉ lưu local (trong phiên)".
+  static Future<void> add(SolvedItem item, {int maxItems = 100}) async {
+    // chặn trùng đơn giản theo id (hoặc theo chữ ký nội dung)
+    if (_items.isNotEmpty && _items.first.id == item.id) return;
 
-    list.insert(0, sig);
-    if (list.length > maxItems) list.removeRange(maxItems, list.length);
-    await prefs.setStringList(_prefsKey, list);
+    _items.insert(0, item);
+
+    // Nếu vượt quá quota, xoá các mục cũ + xoá file ảnh tạm của chúng (nếu có)
+    while (_items.length > maxItems) {
+      final last = _items.removeLast();
+      await _maybeDeleteSessionFile(last.imagePath);
+    }
   }
 
   static Future<void> remove(String id) async {
-    final prefs = await SharedPreferences.getInstance();
-    final list = prefs.getStringList(_prefsKey) ?? <String>[];
-    list.removeWhere((s) {
-      try {
-        final m = SolvedItem.fromJson(jsonDecode(s) as Map<String, dynamic>);
-        return m.id == id;
-      } catch (_) {
-        return false;
-      }
-    });
-    await prefs.setStringList(_prefsKey, list);
+    final idx = _items.indexWhere((e) => e.id == id);
+    if (idx >= 0) {
+      final it = _items.removeAt(idx);
+      await _maybeDeleteSessionFile(it.imagePath);
+    }
   }
 
+  /// Xoá toàn bộ lịch sử trong phiên + file tạm của phiên (không đụng gì ngoài phiên).
   static Future<void> clear() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_prefsKey);
+    // Xoá file ảnh tạm
+    for (final it in _items) {
+      await _maybeDeleteSessionFile(it.imagePath);
+    }
+    _items.clear();
+
+    // Làm sạch thư mục phiên
+    final dir = _sessionDir;
+    if (dir != null && await dir.exists()) {
+      try {
+        await dir.delete(recursive: true);
+      } catch (_) {}
+      await dir.create(recursive: true);
+    }
+  }
+
+  /// Xoá file nếu nó thuộc thư mục phiên.
+  static Future<void> _maybeDeleteSessionFile(String? path) async {
+    if (path == null || path.isEmpty) return;
+    final dir = _sessionDir;
+    if (dir == null) return;
+    try {
+      final f = File(path);
+      if (await f.exists() && path.startsWith(dir.path)) {
+        await f.delete();
+      }
+    } catch (_) {}
   }
 }

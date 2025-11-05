@@ -9,7 +9,8 @@
     "back": "Back",
     "apply": "Apply",
     "continue": "Continue",
-    "unknown": "Unknown"
+    "unknown": "Unknown",
+    "retry": "Retry"
   },
   "home": {
     "title": "Home"
@@ -225,5 +226,28 @@
   "splash": {
     "brand": "Study Whiz AI",
     "tagline": "You learn, AI helps!"
+  },
+  "solve_result": {
+    "title": "View solution",
+    "md": {
+      "question_heading": "## Problem"
+    },
+    "empty": "No content yet.",
+    "question_card_title": "Problem",
+    "loading_question": "— Fetching problem content…",
+    "processing": {
+      "pending": "Waiting in queue...",
+      "assigned": "Study Whiz AI is analyzing..."
+    },
+    "error_title": "No suitable solution found",
+    "http_error": "Try again!",
+    "network_error": "Network error: {error}",
+    "timeout": "No suitable solution found. Please try again.",
+    "no_data_to_resubmit": "No data to resubmit.",
+    "resubmit_failed": "Resubmission failed.",
+    "image": {
+      "load_failed": "Unable to load image",
+      "decode_failed": "Unable to read image"
+    }
   }
 }
